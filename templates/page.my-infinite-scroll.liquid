@@ -104,7 +104,7 @@
       subCollectionList.classList.remove('hidden');
 
       const subCollections = {
-        'fresh-fish': ['Baby Salmon', 'Fillet', 'Atlantic Salmon'],
+        'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
         // Add other collections and their sub-collections here as needed
       };
 
@@ -149,7 +149,7 @@
 
     function fetchAndRenderProducts(category, isSubCategory) {
       const url = isSubCategory
-        ? `/collections/${activeCategory}/products?section_id=main-collection-product-grid`
+        ? `/collections/${category}/products?section_id=main-collection-product-grid`
         : `/collections/${category}/products?section_id=main-collection-product-grid`;
 
       fetch(url)

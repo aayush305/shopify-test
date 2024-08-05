@@ -177,59 +177,71 @@
     }
 
     function fetchAndRenderProducts(category, isSubCategory) {
-            if (loading) return; // Prevent multiple simultaneous requests
-            loading = true;
+      const url = isSubCategory
+        ? `/collections/${category}/products?section_id=main-collection-product-grid`
+        : `/collections/${category}/products?section_id=main-collection-product-grid`;
 
-            const url = isSubCategory
-                ? `/collections/${category}/products.json?page=${currentPage}&limit=12`
-                : `/collections/${category}/products.json?page=${currentPage}&limit=12`;
+      fetch(url)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
+          const itemsContainer = document.getElementById('items-container');
+          
+          if (newProductsSection) {
+            itemsContainer.innerHTML = newProductsSection.innerHTML;
+          } else {
+            itemsContainer.innerHTML = '<p>No products found</p>';
+          }
+        })
+        .catch(error => console.error('Error fetching products:', error));
+    }
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const itemsContainer = document.getElementById('items-container');
-                    if (data.products.length > 0) {
-                        data.products.forEach(product => {
-                            const productItem = document.createElement('div');
-                            productItem.innerHTML = `
-                                <h3>${product.title}</h3>
-                                <img src="${product.images[0].src}" alt="${product.title}" width="200">
-                                <p>${product.variants[0].price}</p>
-                            `;
-                            itemsContainer.appendChild(productItem);
-                        });
-                        currentPage++;
-                    } else {
-                        if(currentPage === 1) {
-                          // Show 'No products found' only for the initial load
-                          itemsContainer.innerHTML = '<p>No products found</p>'; 
-                        }
-                    }
-                    loading = false;
-                })
-                .catch(error => console.error('Error fetching products:', error));
-        }
-
-        // Infinite Scroll Logic
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && !loading) {
-                fetchAndRenderProducts(activeCategory || activeSubCategory, !!activeSubCategory); 
-            }
-        }, { rootMargin: '200px' }); // Trigger load when 200px from bottom
-
-        // Target the last product or loading element
-        const targetElement = () => document.querySelector('#items-container > div:last-child');
-        const observeLastItem = () => targetElement() && observer.observe(targetElement());
-
-        // Initial Observation (after first fetch)
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchAndRenderProducts(document.querySelectorAll('#parent-collections .filter-button')[0].textContent.trim().toLowerCase().replace(/\s+/g, '-'), false);
+    function setupInfiniteScroll() {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !isLoading) {
+            fetchMoreProducts();
+          }
         });
-        
-        // Re-observe after each fetch to track new last item
-        const itemsContainer = document.getElementById('items-container');
-        itemsContainer.addEventListener('DOMNodeInserted', observeLastItem);
+      });
 
-    </script>
+      observer.observe(document.getElementById('loading-indicator'));
+    }
+
+    function fetchMoreProducts() {
+      if (!activeCategory) return;
+
+      isLoading = true;
+      document.getElementById('loading-indicator').classList.remove('hidden');
+
+      const url = `/collections/${activeCategory}/products?page=${nextPage}&section_id=main-collection-product-grid`;
+
+      fetch(url)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
+          const itemsContainer = document.getElementById('items-container');
+          
+          if (newProductsSection) {
+            itemsContainer.innerHTML += newProductsSection.innerHTML;
+            nextPage += 1;
+          } else {
+            itemsContainer.innerHTML += '<p>No more products found</p>';
+          }
+          
+          isLoading = false;
+          document.getElementById('loading-indicator').classList.add('hidden');
+        })
+        .catch(error => {
+          console.error('Error fetching more products:', error);
+          isLoading = false;
+          document.getElementById('loading-indicator').classList.add('hidden');
+        });
+    }
+  </script>
 </body>
 </html>

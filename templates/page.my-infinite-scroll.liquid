@@ -53,7 +53,7 @@
   <div class="sticky-header">
     <h2>Collections</h2>
     <ul class="collection-list" id="parent-collections">
-      {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasonings" | split: ":" %}
+      {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasoning" | split: ":" %}
       {% for collection in collections %}
         <li class="collection-item">
           <button class="filter-button" onclick="selectCategory('{{ collection | handleize }}', this)">{{ collection }}</button>
@@ -71,6 +71,8 @@
 
   <script>
     let activeCategory = null;
+    let activeSubCategory = null;
+    let loading = false;
 
     document.addEventListener('DOMContentLoaded', () => {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -78,6 +80,13 @@
         // Automatically select the first category
         selectCategory(parentCollections[0].textContent.trim().toLowerCase().replace(/\s+/g, '-'), parentCollections[0]);
       }
+
+      // Infinite scrolling
+      window.addEventListener('scroll', () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !loading) {
+          loadNext();
+        }
+      });
     });
 
     function selectCategory(category, element) {
@@ -91,6 +100,7 @@
 
       // Store the active category
       activeCategory = category;
+      activeSubCategory = null; // Reset sub-category
 
       // Show sub-collections if available
       showSubCollections(category);
@@ -104,7 +114,7 @@
       subCollectionList.classList.remove('hidden');
 
       const subCollections = {
-        'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
+        'fresh-fish': ['Baby Salmon', 'Fillet', 'Atlantic Salmon'],
         // Add other collections and their sub-collections here as needed
       };
 
@@ -143,17 +153,26 @@
       // Add active class to the clicked sub-category button
       element.classList.add('active');
 
+      // Store the active sub-category
+      activeSubCategory = subCategory;
+
       // Fetch and render products by sub-category
       fetchAndRenderProducts(subCategory, true);
     }
 
     function fetchAndRenderProducts(category, isSubCategory) {
+      loading = true;
       const url = isSubCategory
-        ? `/collections/${category}/products?section_id=main-collection-product-grid`
+        ? `/collections/${activeCategory}/products?section_id=main-collection-product-grid&filter.p.tag=${category}`
         : `/collections/${category}/products?section_id=main-collection-product-grid`;
 
       fetch(url)
-        .then(response => response.text())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
         .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
@@ -161,12 +180,55 @@
           const itemsContainer = document.getElementById('items-container');
           
           if (newProductsSection) {
-            itemsContainer.innerHTML = newProductsSection.innerHTML;
+            itemsContainer.innerHTML += newProductsSection.innerHTML;
           } else {
-            itemsContainer.innerHTML = '<p>No products found</p>';
+            itemsContainer.innerHTML += '<p>No products found</p>';
           }
         })
-        .catch(error => console.error('Error fetching products:', error));
+        .catch(error => {
+          console.error('Error fetching products:', error);
+          const itemsContainer = document.getElementById('items-container');
+          itemsContainer.innerHTML += '<p>Error fetching products. Please try again later.</p>';
+        })
+        .finally(() => {
+          loading = false;
+        });
+    }
+
+    function loadNext() {
+      const subCollectionList = document.getElementById('sub-collection-list');
+      const subCollectionButtons = subCollectionList.querySelectorAll('.filter-button');
+
+      if (activeSubCategory && subCollectionButtons.length > 0) {
+        // Find the index of the current active sub-category
+        let currentIndex = -1;
+        subCollectionButtons.forEach((button, index) => {
+          if (button.classList.contains('active')) {
+            currentIndex = index;
+          }
+        });
+
+        // Load the next sub-category if available
+        if (currentIndex !== -1 && currentIndex < subCollectionButtons.length - 1) {
+          subCollectionButtons[currentIndex + 1].click();
+          return;
+        }
+      }
+
+      // Load the next parent category if no more sub-categories are available
+      const parentCollectionList = document.getElementById('parent-collections');
+      const parentCollectionButtons = parentCollectionList.querySelectorAll('.filter-button');
+      let currentParentIndex = -1;
+
+      parentCollectionButtons.forEach((button, index) => {
+        if (button.classList.contains('active')) {
+          currentParentIndex = index;
+        }
+      });
+
+      if (currentParentIndex !== -1 && currentParentIndex < parentCollectionButtons.length - 1) {
+        parentCollectionButtons[currentParentIndex + 1].click();
+      }
     }
   </script>
 </body>

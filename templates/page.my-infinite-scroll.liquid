@@ -47,6 +47,16 @@
     .hidden {
       display: none;
     }
+    #items-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .product-item {
+      flex: 0 0 45%; /* Each item takes up 45% of the row, allowing for margin */
+      margin: 10px;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
@@ -162,6 +172,11 @@
           
           if (newProductsSection) {
             itemsContainer.innerHTML = newProductsSection.innerHTML;
+
+            // Add class to each product item
+            itemsContainer.querySelectorAll('.grid__item').forEach(item => {
+              item.classList.add('product-item');
+            });
           } else {
             itemsContainer.innerHTML = '<p>No products found</p>';
           }

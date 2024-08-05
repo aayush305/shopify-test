@@ -33,6 +33,9 @@
       margin: 2px;
       border-radius: 3px;
     }
+    .filter-button.active {
+      background-color: #0056b3;
+    }
     .hidden {
       display: none;
     }
@@ -41,20 +44,16 @@
 <body>
   <div class="sticky-header">
     <h2>Collections</h2>
-    <ul class="collection-list">
+    <ul class="collection-list" id="parent-collections">
       {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasoning" | split: ":" %}
-      {% assign fresh_fish_sub_collections = "Baby Salmon,Fillet,Atlantic Salmon" | split: "," %}
-
       {% for collection in collections %}
         <li class="collection-item">
-          <button class="filter-button" onclick="showSubCollections('{{ collection | handleize }}')">{{ collection }}</button>
+          <button class="filter-button" onclick="selectCategory('{{ collection | handleize }}', this)">{{ collection }}</button>
         </li>
       {% endfor %}
     </ul>
     <ul class="sub-collection-list hidden" id="sub-collection-list">
-      {% for sub_collection in fresh_fish_sub_collections %}
-        <li class="sub-collection-item"><button class="filter-button" onclick="filterItems('{{ sub_collection | handleize }}')">{{ sub_collection }}</button></li>
-      {% endfor %}
+      <!-- Sub-collections will be dynamically added here -->
     </ul>
   </div>
 
@@ -70,7 +69,25 @@
   </div>
 
   <script>
-    function showSubCollections(collection) {
+    let activeCategory = null;
+
+    function selectCategory(category, element) {
+      // Remove active class from all buttons
+      document.querySelectorAll('.filter-button').forEach(button => {
+        button.classList.remove('active');
+      });
+
+      // Add active class to the clicked button
+      element.classList.add('active');
+
+      // Store the active category
+      activeCategory = category;
+
+      // Show sub-collections if available
+      showSubCollections(category);
+    }
+
+    function showSubCollections(category) {
       const subCollectionList = document.getElementById('sub-collection-list');
       subCollectionList.classList.remove('hidden');
 
@@ -82,12 +99,43 @@
       // Clear previous sub-collections
       subCollectionList.innerHTML = '';
 
-      if (subCollections[collection]) {
-        subCollections[collection].forEach(subCollection => {
+      if (subCollections[category]) {
+        subCollections[category].forEach(subCollection => {
           const subCollectionItem = document.createElement('li');
           subCollectionItem.classList.add('sub-collection-item');
 
           const subCollectionButton = document.createElement('button');
           subCollectionButton.classList.add('filter-button');
           subCollectionButton.textContent = subCollection;
-          subCollectionButton.onclick = () => filterItems(subCol
+          subCollectionButton.onclick = () => filterItems(subCollection.toLowerCase().replace(/\s+/g, '-'));
+
+          subCollectionItem.appendChild(subCollectionButton);
+          subCollectionList.appendChild(subCollectionItem);
+        });
+      } else {
+        subCollectionList.classList.add('hidden');
+      }
+    }
+
+    function filterItems(category) {
+      const items = document.querySelectorAll('.item');
+      items.forEach(item => {
+        if (item.dataset.category === category || category === 'all') {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Optionally, you can add a button to show all items
+    document.addEventListener('DOMContentLoaded', () => {
+      const allButton = document.createElement('button');
+      allButton.textContent = 'Show All';
+      allButton.classList.add('filter-button');
+      allButton.onclick = () => filterItems('all');
+      document.querySelector('.sticky-header').appendChild(allButton);
+    });
+  </script>
+</body>
+</html>

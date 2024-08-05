@@ -162,9 +162,7 @@
 
     function fetchAndRenderProducts(category, isSubCategory) {
       loading = true;
-      const url = isSubCategory
-        ? `/collections/${activeCategory}/products?section_id=main-collection-product-grid&filter.p.tag=${category}`
-        : `/collections/${category}/products?section_id=main-collection-product-grid`;
+      const url = `/collections/${category}/products?section_id=main-collection-product-grid`;
 
       fetch(url)
         .then(response => {

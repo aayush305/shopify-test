@@ -53,7 +53,7 @@
   <div class="sticky-header">
     <h2>Collections</h2>
     <ul class="collection-list" id="parent-collections">
-      {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasoning" | split: ":" %}
+      {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasonings" | split: ":" %}
       {% for collection in collections %}
         <li class="collection-item">
           <button class="filter-button" onclick="selectCategory('{{ collection | handleize }}', this)">{{ collection }}</button>

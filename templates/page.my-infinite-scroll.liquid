@@ -149,7 +149,7 @@
 
     function fetchAndRenderProducts(category, isSubCategory) {
       const url = isSubCategory
-        ? `/collections/${activeCategory}/products?section_id=main-collection-product-grid&filter.p.tag=${category}`
+        ? `/collections/${activeCategory}/products?section_id=main-collection-product-grid`
         : `/collections/${category}/products?section_id=main-collection-product-grid`;
 
       fetch(url)

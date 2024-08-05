@@ -66,14 +66,7 @@
   </div>
 
   <div id="items-container">
-    <!-- Your items go here. Example: -->
-    <div class="item" data-category="baby-salmon">Baby Salmon Item 1</div>
-    <div class="item" data-category="fillet">Fillet Item 1</div>
-    <div class="item" data-category="atlantic-salmon">Atlantic Salmon Item 1</div>
-    <div class="item" data-category="baked-fish">Baked Fish Item 1</div>
-    <div class="item" data-category="ground-fish">Ground Fish Item 1</div>
-    <div class="item" data-category="seasoning">Seasoning Item 1</div>
-    <!-- Add more items as needed -->
+    <!-- Your items will be rendered here dynamically -->
   </div>
 
   <script>
@@ -101,6 +94,9 @@
 
       // Show sub-collections if available
       showSubCollections(category);
+
+      // Fetch and render products by category
+      fetchAndRenderProducts(category, false);
     }
 
     function showSubCollections(category) {
@@ -147,19 +143,25 @@
       // Add active class to the clicked sub-category button
       element.classList.add('active');
 
-      // Filter items based on the selected sub-category
-      filterItems(subCategory);
+      // Fetch and render products by sub-category
+      fetchAndRenderProducts(subCategory, true);
     }
 
-    function filterItems(category) {
-      const items = document.querySelectorAll('.item');
-      items.forEach(item => {
-        if (item.dataset.category === category || category === 'all') {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
-        }
-      });
+    function fetchAndRenderProducts(category, isSubCategory) {
+      const url = isSubCategory
+        ? `/collections/${activeCategory}/products?section_id=main-collection-product-grid&filter.p.tag=${category}`
+        : `/collections/${category}/products?section_id=main-collection-product-grid`;
+
+      fetch(url)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newProducts = doc.querySelector('.collection-grid');
+          const itemsContainer = document.getElementById('items-container');
+          itemsContainer.innerHTML = newProducts.innerHTML;
+        })
+        .catch(error => console.error('Error fetching products:', error));
     }
   </script>
 </body>

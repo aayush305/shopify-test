@@ -117,6 +117,9 @@
 
       const subCollections = {
         'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
+        'baked-fish': ['Baked Salmon', 'Baked Cod'],
+        'ground-fish': ['Ground Salmon', 'Ground Cod'],
+        'seasonings': ['Salt', 'Pepper'],
         // Add other collections and their sub-collections here as needed
       };
 
@@ -127,12 +130,37 @@
       if (subCollections[category]) {
         subCollections[category].forEach((subCollection) => {
           activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
+
+          // Display sub-collections
+          const subCollectionItem = document.createElement('li');
+          subCollectionItem.classList.add('sub-collection-item');
+
+          const subCollectionButton = document.createElement('button');
+          subCollectionButton.classList.add('filter-button');
+          subCollectionButton.textContent = subCollection;
+          subCollectionButton.onclick = () => selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
+
+          subCollectionItem.appendChild(subCollectionButton);
+          subCollectionList.appendChild(subCollectionItem);
         });
         currentSubIndex = 0;
         loadMoreProducts();
       } else {
         subCollectionList.classList.add('hidden');
       }
+    }
+
+    function selectSubCategory(subCategory, element) {
+      // Remove active class from all sub-category buttons
+      document.querySelectorAll('.sub-collection-item .filter-button').forEach(button => {
+        button.classList.remove('active');
+      });
+
+      // Add active class to the clicked sub-category button
+      element.classList.add('active');
+
+      // Fetch and render products by sub-category
+      fetchAndRenderProducts(subCategory, true);
     }
 
     function loadMoreProducts() {
@@ -144,6 +172,8 @@
         if (currentParentIndex < parentCollections.length - 1) {
           currentParentIndex++;
           selectCategory(parentCollections[currentParentIndex].textContent.trim().toLowerCase().replace(/\s+/g, '-'), parentCollections[currentParentIndex]);
+        } else {
+          console.log('All collections and sub-collections have been loaded.');
         }
       }
     }

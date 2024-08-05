@@ -47,6 +47,47 @@
     .hidden {
       display: none;
     }
+    .items-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+    }
+    .product-card {
+      width: 48%; /* Adjust width to fit 2 products per row with some margin */
+      margin: 1%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .product-image {
+      width: 100%;
+      height: auto;
+    }
+    .product-title {
+      font-size: 1.2em;
+      margin: 10px 0;
+      color: #333;
+    }
+    .product-price {
+      font-size: 1.1em;
+      color: #007bff;
+      margin: 5px 0;
+    }
+    .view-details-button {
+      cursor: pointer;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      margin: 10px 0;
+      border-radius: 3px;
+      display: inline-block;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -61,105 +102,70 @@
       {% endfor %}
     </ul>
     <ul class="sub-collection-list hidden" id="sub-collection-list">
+      <!-- Sub-collections will be dynamically added here -->
     </ul>
   </div>
 
-  <div id="items-container">
+  <div id="items-container" class="items-container">
+    <!-- Your items will be rendered here dynamically -->
   </div>
-
-  <div id="loading-spinner" class="hidden">Loading...</div>
 
   <script>
     let activeCategory = null;
-    let activeSubCategory = null;
-    let loading = false;
-    let page = 1;
 
     document.addEventListener('DOMContentLoaded', () => {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
       if (parentCollections.length > 0) {
+        // Automatically select the first category
         selectCategory(parentCollections[0].textContent.trim().toLowerCase().replace(/\s+/g, '-'), parentCollections[0]);
       }
-      window.addEventListener('scroll', handleScroll);
     });
 
-    function handleScroll() {
-      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-      if (scrollTop + clientHeight >= scrollHeight - 5 && !loading) {
-        page++;
-        fetchAndRenderProducts(activeSubCategory || activeCategory, true);
-      }
-    }
-
     function selectCategory(category, element) {
-      page = 1;
-      activeCategory = category;
-      activeSubCategory = null;
+      // Remove active class from all buttons
       document.querySelectorAll('.filter-button').forEach(button => {
         button.classList.remove('active');
       });
+
+      // Add active class to the clicked button
       element.classList.add('active');
+
+      // Store the active category
+      activeCategory = category;
+
+      // Show sub-collections if available
       showSubCollections(category);
+
+      // Fetch and render products by category
       fetchAndRenderProducts(category, false);
-    }
-
-    function selectSubCategory(subCategory, element) {
-      page = 1;
-      activeSubCategory = subCategory;
-      document.querySelectorAll('.sub-collection-item .filter-button').forEach(button => {
-        button.classList.remove('active');
-      });
-      element.classList.add('active');
-      fetchAndRenderProducts(subCategory, true);
-    }
-
-    function fetchAndRenderProducts(category, append = false) {
-      const url = `/collections/${category}/products?section_id=main-collection-product-grid&page=${page}`;
-      loading = true;
-      document.getElementById('loading-spinner').classList.remove('hidden');
-      fetch(url)
-        .then(response => response.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
-          const itemsContainer = document.getElementById('items-container');
-          if (newProductsSection) {
-            if (append) {
-              itemsContainer.innerHTML += newProductsSection.innerHTML;
-            } else {
-              itemsContainer.innerHTML = newProductsSection.innerHTML;
-            }
-          } else if (!append) {
-            itemsContainer.innerHTML = '<p>No products found</p>';
-          }
-          loading = false;
-          document.getElementById('loading-spinner').classList.add('hidden');
-        })
-        .catch(error => {
-          console.error('Error fetching products:', error);
-          loading = false;
-          document.getElementById('loading-spinner').classList.add('hidden');
-        });
     }
 
     function showSubCollections(category) {
       const subCollectionList = document.getElementById('sub-collection-list');
       subCollectionList.classList.remove('hidden');
+
       const subCollections = {
         'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
+        // Add other collections and their sub-collections here as needed
       };
+
+      // Clear previous sub-collections
       subCollectionList.innerHTML = '';
+
       if (subCollections[category]) {
         subCollections[category].forEach((subCollection, index) => {
           const subCollectionItem = document.createElement('li');
           subCollectionItem.classList.add('sub-collection-item');
+
           const subCollectionButton = document.createElement('button');
           subCollectionButton.classList.add('filter-button');
           subCollectionButton.textContent = subCollection;
           subCollectionButton.onclick = () => selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
+
           subCollectionItem.appendChild(subCollectionButton);
           subCollectionList.appendChild(subCollectionItem);
+
+          // Automatically select the first sub-category
           if (index === 0) {
             selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
           }
@@ -167,6 +173,58 @@
       } else {
         subCollectionList.classList.add('hidden');
       }
+    }
+
+    function selectSubCategory(subCategory, element) {
+      // Remove active class from all sub-category buttons
+      document.querySelectorAll('.sub-collection-item .filter-button').forEach(button => {
+        button.classList.remove('active');
+      });
+
+      // Add active class to the clicked sub-category button
+      element.classList.add('active');
+
+      // Fetch and render products by sub-category
+      fetchAndRenderProducts(subCategory, true);
+    }
+
+    function fetchAndRenderProducts(category, isSubCategory) {
+      const url = `/collections/${category}/products?section_id=main-collection-product-grid`;
+
+      fetch(url)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
+          const itemsContainer = document.getElementById('items-container');
+          
+          if (newProductsSection) {
+            itemsContainer.innerHTML = '';
+
+            const products = newProductsSection.querySelectorAll('.product-item'); // Adjust this selector based on actual structure
+            products.forEach(product => {
+              const productCard = document.createElement('div');
+              productCard.classList.add('product-card');
+
+              const productImage = product.querySelector('.product-image'); // Adjust this selector based on actual structure
+              const productTitle = product.querySelector('.product-title'); // Adjust this selector based on actual structure
+              const productPrice = product.querySelector('.product-price'); // Adjust this selector based on actual structure
+
+              productCard.innerHTML = `
+                <img src="${productImage.src}" alt="${productTitle.textContent}" class="product-image">
+                <h3 class="product-title">${productTitle.textContent}</h3>
+                <p class="product-price">${productPrice.textContent}</p>
+                <a href="${product.querySelector('a').href}" class="view-details-button">View Details</a>
+              `;
+
+              itemsContainer.appendChild(productCard);
+            });
+          } else {
+            itemsContainer.innerHTML = '<p>No products found</p>';
+          }
+        })
+        .catch(error => console.error('Error fetching products:', error));
     }
   </script>
 </body>

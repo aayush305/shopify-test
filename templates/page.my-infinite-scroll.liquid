@@ -53,7 +53,7 @@
   <div class="sticky-header">
     <h2>Collections</h2>
     <ul class="collection-list" id="parent-collections">
-      {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasoning" | split: ":" %}
+      {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasonings" | split: ":" %}
       {% for collection in collections %}
         <li class="collection-item">
           <button class="filter-button" onclick="selectCategory('{{ collection | handleize }}', this)">{{ collection }}</button>
@@ -61,171 +61,111 @@
       {% endfor %}
     </ul>
     <ul class="sub-collection-list hidden" id="sub-collection-list">
-      <!-- Sub-collections will be dynamically added here -->
     </ul>
   </div>
 
   <div id="items-container">
-    <!-- Your items will be rendered here dynamically -->
   </div>
+
+  <div id="loading-spinner" class="hidden">Loading...</div>
 
   <script>
     let activeCategory = null;
     let activeSubCategory = null;
     let loading = false;
+    let page = 1;
 
     document.addEventListener('DOMContentLoaded', () => {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
       if (parentCollections.length > 0) {
-        // Automatically select the first category
         selectCategory(parentCollections[0].textContent.trim().toLowerCase().replace(/\s+/g, '-'), parentCollections[0]);
       }
-
-      // Infinite scrolling
-      window.addEventListener('scroll', () => {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !loading) {
-          loadNext();
-        }
-      });
+      window.addEventListener('scroll', handleScroll);
     });
 
+    function handleScroll() {
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      if (scrollTop + clientHeight >= scrollHeight - 5 && !loading) {
+        page++;
+        fetchAndRenderProducts(activeSubCategory || activeCategory, true);
+      }
+    }
+
     function selectCategory(category, element) {
-      // Remove active class from all buttons
+      page = 1;
+      activeCategory = category;
+      activeSubCategory = null;
       document.querySelectorAll('.filter-button').forEach(button => {
         button.classList.remove('active');
       });
-
-      // Add active class to the clicked button
       element.classList.add('active');
-
-      // Store the active category
-      activeCategory = category;
-      activeSubCategory = null; // Reset sub-category
-
-      // Show sub-collections if available
       showSubCollections(category);
-
-      // Fetch and render products by category
       fetchAndRenderProducts(category, false);
+    }
+
+    function selectSubCategory(subCategory, element) {
+      page = 1;
+      activeSubCategory = subCategory;
+      document.querySelectorAll('.sub-collection-item .filter-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      element.classList.add('active');
+      fetchAndRenderProducts(subCategory, true);
+    }
+
+    function fetchAndRenderProducts(category, append = false) {
+      const url = `/collections/${category}/products?section_id=main-collection-product-grid&page=${page}`;
+      loading = true;
+      document.getElementById('loading-spinner').classList.remove('hidden');
+      fetch(url)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
+          const itemsContainer = document.getElementById('items-container');
+          if (newProductsSection) {
+            if (append) {
+              itemsContainer.innerHTML += newProductsSection.innerHTML;
+            } else {
+              itemsContainer.innerHTML = newProductsSection.innerHTML;
+            }
+          } else if (!append) {
+            itemsContainer.innerHTML = '<p>No products found</p>';
+          }
+          loading = false;
+          document.getElementById('loading-spinner').classList.add('hidden');
+        })
+        .catch(error => {
+          console.error('Error fetching products:', error);
+          loading = false;
+          document.getElementById('loading-spinner').classList.add('hidden');
+        });
     }
 
     function showSubCollections(category) {
       const subCollectionList = document.getElementById('sub-collection-list');
       subCollectionList.classList.remove('hidden');
-
       const subCollections = {
-        'fresh-fish': ['Baby Salmon', 'Fillet', 'Atlantic Salmon'],
-        // Add other collections and their sub-collections here as needed
+        'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
       };
-
-      // Clear previous sub-collections
       subCollectionList.innerHTML = '';
-
       if (subCollections[category]) {
         subCollections[category].forEach((subCollection, index) => {
           const subCollectionItem = document.createElement('li');
           subCollectionItem.classList.add('sub-collection-item');
-
           const subCollectionButton = document.createElement('button');
           subCollectionButton.classList.add('filter-button');
           subCollectionButton.textContent = subCollection;
           subCollectionButton.onclick = () => selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
-
           subCollectionItem.appendChild(subCollectionButton);
           subCollectionList.appendChild(subCollectionItem);
-
-          // Automatically select the first sub-category
           if (index === 0) {
             selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
           }
         });
       } else {
         subCollectionList.classList.add('hidden');
-      }
-    }
-
-    function selectSubCategory(subCategory, element) {
-      // Remove active class from all sub-category buttons
-      document.querySelectorAll('.sub-collection-item .filter-button').forEach(button => {
-        button.classList.remove('active');
-      });
-
-      // Add active class to the clicked sub-category button
-      element.classList.add('active');
-
-      // Store the active sub-category
-      activeSubCategory = subCategory;
-
-      // Fetch and render products by sub-category
-      fetchAndRenderProducts(subCategory, true);
-    }
-
-    function fetchAndRenderProducts(category, isSubCategory) {
-      loading = true;
-      const url = `/collections/${category}/products?section_id=main-collection-product-grid`;
-
-      fetch(url)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.text();
-        })
-        .then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
-          const itemsContainer = document.getElementById('items-container');
-          
-          if (newProductsSection) {
-            itemsContainer.innerHTML += newProductsSection.innerHTML;
-          } else {
-            itemsContainer.innerHTML += '<p>No products found</p>';
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching products:', error);
-          const itemsContainer = document.getElementById('items-container');
-          itemsContainer.innerHTML += '<p>Error fetching products. Please try again later.</p>';
-        })
-        .finally(() => {
-          loading = false;
-        });
-    }
-
-    function loadNext() {
-      const subCollectionList = document.getElementById('sub-collection-list');
-      const subCollectionButtons = subCollectionList.querySelectorAll('.filter-button');
-
-      if (activeSubCategory && subCollectionButtons.length > 0) {
-        // Find the index of the current active sub-category
-        let currentIndex = -1;
-        subCollectionButtons.forEach((button, index) => {
-          if (button.classList.contains('active')) {
-            currentIndex = index;
-          }
-        });
-
-        // Load the next sub-category if available
-        if (currentIndex !== -1 && currentIndex < subCollectionButtons.length - 1) {
-          subCollectionButtons[currentIndex + 1].click();
-          return;
-        }
-      }
-
-      // Load the next parent category if no more sub-categories are available
-      const parentCollectionList = document.getElementById('parent-collections');
-      const parentCollectionButtons = parentCollectionList.querySelectorAll('.filter-button');
-      let currentParentIndex = -1;
-
-      parentCollectionButtons.forEach((button, index) => {
-        if (button.classList.contains('active')) {
-          currentParentIndex = index;
-        }
-      });
-
-      if (currentParentIndex !== -1 && currentParentIndex < parentCollectionButtons.length - 1) {
-        parentCollectionButtons[currentParentIndex + 1].click();
       }
     }
   </script>

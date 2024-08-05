@@ -47,6 +47,30 @@
     .hidden {
       display: none;
     }
+    .product-card {
+      display: flex;
+      margin: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      overflow: hidden;
+      width: calc(50% - 20px); /* Two products per row */
+    }
+    .product-image {
+      width: 60%;
+    }
+    .product-image img {
+      width: 100%;
+      height: auto;
+    }
+    .product-details {
+      width: 40%;
+      padding: 10px;
+    }
+    #items-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
   </style>
 </head>
 <body>
@@ -162,6 +186,21 @@
           
           if (newProductsSection) {
             itemsContainer.innerHTML = newProductsSection.innerHTML;
+            // Apply new layout to each product card
+            itemsContainer.querySelectorAll('.product-card').forEach(card => {
+              card.classList.add('product-card');
+              const img = card.querySelector('img');
+              if (img) {
+                const imageContainer = document.createElement('div');
+                imageContainer.classList.add('product-image');
+                imageContainer.appendChild(img);
+                card.insertBefore(imageContainer, card.firstChild);
+              }
+              const details = card.querySelector('.details');
+              if (details) {
+                details.classList.add('product-details');
+              }
+            });
           } else {
             itemsContainer.innerHTML = '<p>No products found</p>';
           }

@@ -157,11 +157,11 @@
         .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
-          const newProducts = doc.querySelector('.collection-grid') || doc.querySelector('#shopify-section-main-collection-product-grid');
+          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
           const itemsContainer = document.getElementById('items-container');
           
-          if (newProducts) {
-            itemsContainer.innerHTML = newProducts.innerHTML;
+          if (newProductsSection) {
+            itemsContainer.innerHTML = newProductsSection.innerHTML;
           } else {
             itemsContainer.innerHTML = '<p>No products found</p>';
           }

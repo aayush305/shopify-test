@@ -36,6 +36,14 @@
     .filter-button.active {
       background-color: #0056b3;
     }
+    .sub-collection-item .filter-button {
+      background-color: white;
+      color: black;
+      border: 1px solid #ccc;
+    }
+    .sub-collection-item .filter-button.active {
+      border-color: red;
+    }
     .hidden {
       display: none;
     }
@@ -107,7 +115,7 @@
           const subCollectionButton = document.createElement('button');
           subCollectionButton.classList.add('filter-button');
           subCollectionButton.textContent = subCollection;
-          subCollectionButton.onclick = () => filterItems(subCollection.toLowerCase().replace(/\s+/g, '-'));
+          subCollectionButton.onclick = () => selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
 
           subCollectionItem.appendChild(subCollectionButton);
           subCollectionList.appendChild(subCollectionItem);
@@ -115,6 +123,19 @@
       } else {
         subCollectionList.classList.add('hidden');
       }
+    }
+
+    function selectSubCategory(subCategory, element) {
+      // Remove active class from all sub-category buttons
+      document.querySelectorAll('.sub-collection-item .filter-button').forEach(button => {
+        button.classList.remove('active');
+      });
+
+      // Add active class to the clicked sub-category button
+      element.classList.add('active');
+
+      // Filter items based on the selected sub-category
+      filterItems(subCategory);
     }
 
     function filterItems(category) {
@@ -127,15 +148,6 @@
         }
       });
     }
-
-    // Optionally, you can add a button to show all items
-    document.addEventListener('DOMContentLoaded', () => {
-      const allButton = document.createElement('button');
-      allButton.textContent = 'Show All';
-      allButton.classList.add('filter-button');
-      allButton.onclick = () => filterItems('all');
-      document.querySelector('.sticky-header').appendChild(allButton);
-    });
   </script>
 </body>
 </html>

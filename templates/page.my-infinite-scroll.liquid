@@ -12,19 +12,17 @@
       z-index: 1000;
       padding: 10px;
       border-bottom: 1px solid #ccc;
+      text-align: center;
     }
-    .collection-list {
+    .collection-list, .sub-collection-list {
+      display: flex;
+      justify-content: center;
       list-style: none;
       padding: 0;
       margin: 0;
     }
-    .collection-item {
-      margin-bottom: 5px;
-    }
-    .sub-collection-list {
-      list-style: none;
-      padding-left: 20px;
-      margin: 0;
+    .collection-item, .sub-collection-item {
+      margin: 0 5px;
     }
     .filter-button {
       cursor: pointer;
@@ -34,6 +32,9 @@
       padding: 5px 10px;
       margin: 2px;
       border-radius: 3px;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -46,15 +47,13 @@
 
       {% for collection in collections %}
         <li class="collection-item">
-          <button class="filter-button" onclick="filterItems('{{ collection | handleize }}')">{{ collection }}</button>
-          {% if collection == "Fresh Fish" %}
-            <ul class="sub-collection-list">
-              {% for sub_collection in fresh_fish_sub_collections %}
-                <li class="sub-collection-item"><button class="filter-button" onclick="filterItems('{{ sub_collection | handleize }}')">{{ sub_collection }}</button></li>
-              {% endfor %}
-            </ul>
-          {% endif %}
+          <button class="filter-button" onclick="showSubCollections('{{ collection | handleize }}')">{{ collection }}</button>
         </li>
+      {% endfor %}
+    </ul>
+    <ul class="sub-collection-list hidden" id="sub-collection-list">
+      {% for sub_collection in fresh_fish_sub_collections %}
+        <li class="sub-collection-item"><button class="filter-button" onclick="filterItems('{{ sub_collection | handleize }}')">{{ sub_collection }}</button></li>
       {% endfor %}
     </ul>
   </div>
@@ -71,25 +70,24 @@
   </div>
 
   <script>
-    function filterItems(category) {
-      const items = document.querySelectorAll('.item');
-      items.forEach(item => {
-        if (item.dataset.category === category || category === 'all') {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    }
+    function showSubCollections(collection) {
+      const subCollectionList = document.getElementById('sub-collection-list');
+      subCollectionList.classList.remove('hidden');
 
-    // Optionally, you can add a button to show all items
-    document.addEventListener('DOMContentLoaded', () => {
-      const allButton = document.createElement('button');
-      allButton.textContent = 'Show All';
-      allButton.classList.add('filter-button');
-      allButton.onclick = () => filterItems('all');
-      document.querySelector('.sticky-header').appendChild(allButton);
-    });
-  </script>
-</body>
-</html>
+      const subCollections = {
+        'fresh-fish': ['Baby Salmon', 'Fillet', 'Atlantic Salmon'],
+        // Add other collections and their sub-collections here as needed
+      };
+
+      // Clear previous sub-collections
+      subCollectionList.innerHTML = '';
+
+      if (subCollections[collection]) {
+        subCollections[collection].forEach(subCollection => {
+          const subCollectionItem = document.createElement('li');
+          subCollectionItem.classList.add('sub-collection-item');
+
+          const subCollectionButton = document.createElement('button');
+          subCollectionButton.classList.add('filter-button');
+          subCollectionButton.textContent = subCollection;
+          subCollectionButton.onclick = () => filterItems(subCol

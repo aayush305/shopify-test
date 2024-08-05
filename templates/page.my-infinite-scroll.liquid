@@ -79,6 +79,14 @@
   <script>
     let activeCategory = null;
 
+    document.addEventListener('DOMContentLoaded', () => {
+      const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
+      if (parentCollections.length > 0) {
+        // Automatically select the first category
+        selectCategory(parentCollections[0].textContent.trim().toLowerCase().replace(/\s+/g, '-'), parentCollections[0]);
+      }
+    });
+
     function selectCategory(category, element) {
       // Remove active class from all buttons
       document.querySelectorAll('.filter-button').forEach(button => {
@@ -108,7 +116,7 @@
       subCollectionList.innerHTML = '';
 
       if (subCollections[category]) {
-        subCollections[category].forEach(subCollection => {
+        subCollections[category].forEach((subCollection, index) => {
           const subCollectionItem = document.createElement('li');
           subCollectionItem.classList.add('sub-collection-item');
 
@@ -119,6 +127,11 @@
 
           subCollectionItem.appendChild(subCollectionButton);
           subCollectionList.appendChild(subCollectionItem);
+
+          // Automatically select the first sub-category
+          if (index === 0) {
+            selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
+          }
         });
       } else {
         subCollectionList.classList.add('hidden');

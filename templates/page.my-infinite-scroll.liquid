@@ -47,36 +47,6 @@
     .hidden {
       display: none;
     }
-
-    /* Add the following CSS */
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr); /* 2 products per row */
-      gap: 20px; /* space between products */
-      padding: 10px;
-    }
-
-    .product-item {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-
-    .product-title {
-      font-size: 1.2em;
-      margin: 10px 0;
-    }
-
-    .product-price {
-      color: green;
-      font-size: 1.1em;
-      margin: 10px 0;
-    }
-
-    .product-description {
-      font-size: 0.9em;
-      margin: 10px 0;
-    }
   </style>
 </head>
 <body>
@@ -189,27 +159,9 @@
           const doc = parser.parseFromString(html, 'text/html');
           const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
           const itemsContainer = document.getElementById('items-container');
-
+          
           if (newProductsSection) {
-            // Extract product details and render them
-            const products = newProductsSection.querySelectorAll('.grid__item');
-            itemsContainer.innerHTML = '<div class="product-grid"></div>';
-            const productGrid = itemsContainer.querySelector('.product-grid');
-
-            products.forEach(product => {
-              const productTitle = product.querySelector('.card__name')?.innerText || 'No title';
-              const productPrice = product.querySelector('.price')?.innerText || 'No price';
-              const productDescription = product.querySelector('.card__description')?.innerText || 'No description';
-
-              const productItem = `
-                <div class="product-item">
-                  <div class="product-title">${productTitle}</div>
-                  <div class="product-price">${productPrice}</div>
-                  <div class="product-description">${productDescription}</div>
-                </div>
-              `;
-              productGrid.innerHTML += productItem;
-            });
+            itemsContainer.innerHTML = newProductsSection.innerHTML;
           } else {
             itemsContainer.innerHTML = '<p>No products found</p>';
           }

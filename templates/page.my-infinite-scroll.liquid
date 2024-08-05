@@ -26,21 +26,32 @@
       padding-left: 20px;
       margin: 0;
     }
+    .filter-button {
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      margin: 2px;
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
   <div class="sticky-header">
     <h2>Collections</h2>
     <ul class="collection-list">
-      {% assign collections = "Fresh Fish,Baked Fish,Ground Fish,Seasoning" | split: "," %}
+      {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasoning" | split: ":" %}
+      {% assign fresh_fish_sub_collections = "Baby Salmon,Fillet,Atlantic Salmon" | split: "," %}
+
       {% for collection in collections %}
         <li class="collection-item">
-          <a href="/collections/{{ collection | handleize }}">{{ collection }}</a>
+          <button class="filter-button" onclick="filterItems('{{ collection | handleize }}')">{{ collection }}</button>
           {% if collection == "Fresh Fish" %}
             <ul class="sub-collection-list">
-              <li class="sub-collection-item"><a href="/collections/fresh-fish/baby-salmon">Baby Salmon</a></li>
-              <li class="sub-collection-item"><a href="/collections/fresh-fish/fillet">Fillet</a></li>
-              <li class="sub-collection-item"><a href="/collections/fresh-fish/atlantic-salmon">Atlantic Salmon</a></li>
+              {% for sub_collection in fresh_fish_sub_collections %}
+                <li class="sub-collection-item"><button class="filter-button" onclick="filterItems('{{ sub_collection | handleize }}')">{{ sub_collection }}</button></li>
+              {% endfor %}
             </ul>
           {% endif %}
         </li>
@@ -48,8 +59,37 @@
     </ul>
   </div>
 
-  <div>
-    <h1>Hello World!</h1>
+  <div id="items-container">
+    <!-- Your items go here. Example: -->
+    <div class="item" data-category="baby-salmon">Baby Salmon Item 1</div>
+    <div class="item" data-category="fillet">Fillet Item 1</div>
+    <div class="item" data-category="atlantic-salmon">Atlantic Salmon Item 1</div>
+    <div class="item" data-category="baked-fish">Baked Fish Item 1</div>
+    <div class="item" data-category="ground-fish">Ground Fish Item 1</div>
+    <div class="item" data-category="seasoning">Seasoning Item 1</div>
+    <!-- Add more items as needed -->
   </div>
+
+  <script>
+    function filterItems(category) {
+      const items = document.querySelectorAll('.item');
+      items.forEach(item => {
+        if (item.dataset.category === category || category === 'all') {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Optionally, you can add a button to show all items
+    document.addEventListener('DOMContentLoaded', () => {
+      const allButton = document.createElement('button');
+      allButton.textContent = 'Show All';
+      allButton.classList.add('filter-button');
+      allButton.onclick = () => filterItems('all');
+      document.querySelector('.sticky-header').appendChild(allButton);
+    });
+  </script>
 </body>
 </html>

@@ -52,13 +52,6 @@
       width: calc(50% - var(--grid-desktop-horizontal-spacing)* 3 / 4) !important;
       max-width: calc(50% - var(--grid-desktop-horizontal-spacing)* 3 / 4) !important;
     }
-    .section-main-collection-product-grid-padding{
-        padding: 0px !important;
-        margin: 0px !important;
-    }
-    #main-collection-filters{
-        display: none;
-    }
   </style>
 </head>
 <body>
@@ -88,6 +81,7 @@
     let currentSubIndex = 0;
     let isLoading = false;
     let lastScrollTop = 0;
+    let isScrollingDown = true;
 
     document.addEventListener('DOMContentLoaded', () => {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -103,8 +97,10 @@
 
     function handleScroll() {
       const st = window.pageYOffset || document.documentElement.scrollTop;
+      isScrollingDown = st > lastScrollTop;
+
       if (!isLoading) {
-        if (st > lastScrollTop) {
+        if (isScrollingDown) {
           // Scrolling down
           if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
             loadMoreProducts();
@@ -116,6 +112,7 @@
           }
         }
       }
+
       lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
     }
 
@@ -213,9 +210,8 @@
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
         if (currentParentIndex > 0) {
           currentParentIndex--;
-          selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
-          activeSubCollections = [];
-          showSubCollections(parentCollections[currentParentIndex].dataset.category);
+          activeCategory = parentCollections[currentParentIndex].dataset.category;
+          selectCategory(activeCategory, parentCollections[currentParentIndex]);
           currentSubIndex = activeSubCollections.length - 1;
           const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
           selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
@@ -238,7 +234,11 @@
           const itemsContainer = document.getElementById('items-container');
           
           if (newProductsSection) {
-            itemsContainer.innerHTML += newProductsSection.innerHTML;
+            if (isScrollingDown) {
+              itemsContainer.innerHTML += newProductsSection.innerHTML;
+            } else {
+              itemsContainer.innerHTML = newProductsSection.innerHTML + itemsContainer.innerHTML;
+            }
           } else {
             itemsContainer.innerHTML += '<p>No products found</p>';
           }
@@ -252,3 +252,4 @@
   </script>
 </body>
 </html>
+``

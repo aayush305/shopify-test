@@ -88,11 +88,6 @@
     let currentSubIndex = 0;
     let isLoading = false;
     let lastScrollTop = 0;
-    let productsPerPage = 15; // Number of products to load per page
-    let totalProductsToLoad = 45; // Total products to keep in view
-    let loadedProducts = [];
-    let currentPage = 1; // Current page number for pagination
-    let bufferZone = 500; // Preload buffer zone
 
     document.addEventListener('DOMContentLoaded', () => {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -111,12 +106,12 @@
       if (!isLoading) {
         if (st > lastScrollTop) {
           // Scrolling down
-          if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - bufferZone) {
+          if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
             loadMoreProducts();
           }
         } else {
           // Scrolling up
-          if (window.scrollY < bufferZone) {
+          if (window.scrollY < 500) {
             loadPreviousProducts();
           }
         }
@@ -135,10 +130,6 @@
 
       // Store the active category
       activeCategory = category;
-
-      // Reset pagination and loaded products
-      currentPage = 1;
-      loadedProducts = [];
 
       // Show sub-collections if available
       showSubCollections(category);
@@ -193,20 +184,15 @@
       // Add active class to the clicked sub-category button
       element.classList.add('active');
 
-      // Reset pagination and loaded products
-      currentPage = 1;
-      loadedProducts = [];
-
       // Fetch and render products by sub-category
       fetchAndRenderProducts(subCategory, true);
     }
 
     function loadMoreProducts() {
-      if (loadedProducts.length < totalProductsToLoad) {
-        fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
-      } else if (currentSubIndex < activeSubCollections.length - 1) {
+      if (currentSubIndex < activeSubCollections.length) {
+        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
         currentSubIndex++;
-        fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
       } else {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
         if (currentParentIndex < parentCollections.length - 1) {
@@ -221,14 +207,16 @@
     function loadPreviousProducts() {
       if (currentSubIndex > 0) {
         currentSubIndex--;
-        fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
+        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
       } else {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
         if (currentParentIndex > 0) {
           currentParentIndex--;
           selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
           currentSubIndex = activeSubCollections.length - 1;
-          fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
+          const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+          selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
         }
       }
     }
@@ -236,8 +224,8 @@
     function fetchAndRenderProducts(category, isSubCategory) {
       isLoading = true;
       const url = isSubCategory
-        ? `/collections/${category}/products?page=${currentPage}&limit=${productsPerPage}&section_id=main-collection-product-grid`
-        : `/collections/${category}/products?page=${currentPage}&limit=${productsPerPage}&section_id=main-collection-product-grid`;
+        ? `/collections/${category}/products?section_id=main-collection-product-grid`
+        : `/collections/${category}/products?section_id=main-collection-product-grid`;
 
       fetch(url)
         .then(response => response.text())
@@ -246,25 +234,12 @@
           const doc = parser.parseFromString(html, 'text/html');
           const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
           const itemsContainer = document.getElementById('items-container');
-
+          
           if (newProductsSection) {
-            if (currentPage === 1) {
-              itemsContainer.innerHTML = newProductsSection.innerHTML; // Replace initial content
-            } else {
-              itemsContainer.innerHTML += newProductsSection.innerHTML; // Append new content
-            }
-
-            loadedProducts = itemsContainer.querySelectorAll('.grid__item');
-            if (loadedProducts.length < totalProductsToLoad) {
-              currentPage++;
-              fetchAndRenderProducts(category, isSubCategory);
-            }
+            itemsContainer.innerHTML += newProductsSection.innerHTML;
           } else {
-            if (currentPage === 1) {
-              itemsContainer.innerHTML = '<p>No products found</p>';
-            }
+            itemsContainer.innerHTML += '<p>No products found</p>';
           }
-
           isLoading = false;
         })
         .catch(error => {

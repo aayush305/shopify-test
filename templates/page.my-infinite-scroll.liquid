@@ -87,9 +87,7 @@
     let currentParentIndex = 0;
     let currentSubIndex = 0;
     let isLoading = false;
-    let lastScrollTop = 0;
-    let totalProducts = 0;
-    let buffer = 15;
+    let totalProductsLoaded = 0;
     let productsBuffer = [];
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -105,32 +103,27 @@
     });
 
     function handleScroll() {
-      const st = window.pageYOffset || document.documentElement.scrollTop;
       if (!isLoading) {
-        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-          // Scrolling down
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.body.offsetHeight;
+
+        if (scrollTop + windowHeight >= documentHeight - 500) {
           loadMoreProducts();
-        } else if (window.scrollY < 500) {
-          // Scrolling up
+        } else if (scrollTop <= 500) {
           loadPreviousProducts();
         }
       }
-      lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
     }
 
     function selectCategory(category, element) {
-      // Remove active class from all parent buttons
       document.querySelectorAll('#parent-collections .filter-button').forEach(button => {
         button.classList.remove('active');
       });
 
-      // Add active class to the clicked parent button
       element.classList.add('active');
-
-      // Store the active category
       activeCategory = category;
 
-      // Show sub-collections if available
       showSubCollections(category);
     }
 
@@ -140,13 +133,11 @@
 
       const subCollections = {
         'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
-        'baked-fish': ['Baked FIsh'],
+        'baked-fish': ['Baked Fish'],
         'ground-fish': ['Ground Fish'],
         'seasonings': ['Seasonings'],
-        // Add other collections and their sub-collections here as needed
       };
 
-      // Clear previous sub-collections
       subCollectionList.innerHTML = '';
       activeSubCollections = [];
 
@@ -154,7 +145,6 @@
         subCollections[category].forEach((subCollection) => {
           activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
 
-          // Display sub-collections
           const subCollectionItem = document.createElement('li');
           subCollectionItem.classList.add('sub-collection-item');
 
@@ -168,6 +158,7 @@
           subCollectionList.appendChild(subCollectionItem);
         });
         currentSubIndex = 0;
+        productsBuffer = [];
         loadMoreProducts();
       } else {
         subCollectionList.classList.add('hidden');
@@ -175,21 +166,16 @@
     }
 
     function selectSubCategory(subCategory, element) {
-      // Remove active class from all sub-category buttons
       document.querySelectorAll('.sub-collection-item .filter-button').forEach(button => {
         button.classList.remove('active');
       });
 
-      // Add active class to the clicked sub-category button
       element.classList.add('active');
-
-      // Fetch and render products by sub-category
       fetchAndRenderProducts(subCategory, true);
     }
 
     function loadMoreProducts() {
       if (productsBuffer.length < 45) {
-        // Fetch products for current and next sub-categories
         if (currentSubIndex < activeSubCollections.length) {
           const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
           selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
@@ -204,14 +190,12 @@
           }
         }
       } else {
-        // Render products from buffer
         renderProductsFromBuffer();
       }
     }
 
     function loadPreviousProducts() {
       if (productsBuffer.length < 45) {
-        // Fetch products for previous sub-categories
         if (currentSubIndex > 0) {
           currentSubIndex--;
           const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
@@ -227,17 +211,17 @@
           }
         }
       } else {
-        // Render products from buffer
         renderProductsFromBuffer();
       }
     }
 
     function renderProductsFromBuffer() {
       const itemsContainer = document.getElementById('items-container');
-      const productsToRender = productsBuffer.splice(0, 15);
-      productsToRender.forEach(product => {
+      while (productsBuffer.length > 0 && totalProductsLoaded < 45) {
+        const product = productsBuffer.shift();
         itemsContainer.innerHTML += product;
-      });
+        totalProductsLoaded++;
+      }
     }
 
     function fetchAndRenderProducts(category, isSubCategory) {

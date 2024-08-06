@@ -60,7 +60,7 @@
       {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasonings" | split: ":" %}
       {% for collection in collections %}
         <li class="collection-item">
-          <button class="filter-button" onclick="selectCategory('{{ collection | handleize }}', this)">{{ collection }}</button>
+          <button class="filter-button" data-category="{{ collection | handleize }}">{{ collection }}</button>
         </li>
       {% endfor %}
     </ul>
@@ -84,9 +84,12 @@
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
       if (parentCollections.length > 0) {
         // Automatically select the first category
-        selectCategory(parentCollections[0].textContent.trim().toLowerCase().replace(/\s+/g, '-'), parentCollections[0]);
+        selectCategory(parentCollections[0].dataset.category, parentCollections[0]);
       }
       window.addEventListener('scroll', handleScroll);
+      parentCollections.forEach(button => {
+        button.addEventListener('click', () => selectCategory(button.dataset.category, button));
+      });
     });
 
     function handleScroll() {
@@ -117,6 +120,9 @@
 
       const subCollections = {
         'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
+        'baked-fish': ['Baked FIsh'],
+        'ground-fish': ['Ground Fish'],
+        'seasonings': ['Seasonings'],
         // Add other collections and their sub-collections here as needed
       };
 
@@ -135,6 +141,7 @@
           const subCollectionButton = document.createElement('button');
           subCollectionButton.classList.add('filter-button');
           subCollectionButton.textContent = subCollection;
+          subCollectionButton.dataset.category = subCollection.toLowerCase().replace(/\s+/g, '-');
           subCollectionButton.onclick = () => selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
 
           subCollectionItem.appendChild(subCollectionButton);
@@ -168,7 +175,7 @@
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
         if (currentParentIndex < parentCollections.length - 1) {
           currentParentIndex++;
-          selectCategory(parentCollections[currentParentIndex].textContent.trim().toLowerCase().replace(/\s+/g, '-'), parentCollections[currentParentIndex]);
+          selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
         } else {
           console.log('All collections and sub-collections have been loaded.');
         }

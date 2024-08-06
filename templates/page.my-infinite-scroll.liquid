@@ -89,43 +89,35 @@
     let isLoading = false;
     let lastScrollTop = 0;
 
-    // Constants
-    const PRODUCTS_PER_FETCH = 15;
-    const OVERLAP = 15; // Products to load before/after for smoother scrolling
+    document.addEventListener('DOMContentLoaded', () => {
+      const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
+      if (parentCollections.length > 0) {
+        // Automatically select the first category
+        selectCategory(parentCollections[0].dataset.category, parentCollections[0]);
+      }
+      window.addEventListener('scroll', handleScroll);
+      parentCollections.forEach(button => {
+        button.addEventListener('click', () => selectCategory(button.dataset.category, button));
+      });
+    });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // ... (Initial category selection remains the same) ...
-      window.addEventListener('scroll', lazyLoadProducts); // Change event listener
-    });
-
-    function lazyLoadProducts() {
-      const items = document.querySelectorAll('#items-container .grid__item'); // Get visible products
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const viewportHeight = window.innerHeight;
-
-      // Find the indices of the first and last visible products
-      let firstVisibleIndex = -1;
-      let lastVisibleIndex = -1;
-      items.forEach((item, index) => {
-        const itemRect = item.getBoundingClientRect();
-        if (itemRect.top < viewportHeight && itemRect.bottom >= 0) {
-          if (firstVisibleIndex === -1) {
-            firstVisibleIndex = index;
-          }
-          lastVisibleIndex = index;
-        }
-      });
-
-      // Determine the range of products to fetch
-      const startIndex = Math.max(0, firstVisibleIndex - OVERLAP);
-      const endIndex = Math.min(items.length - 1, lastVisibleIndex + OVERLAP);
-
-      // If we don't have enough products, fetch more
-      if (endIndex - startIndex + 1 < PRODUCTS_PER_FETCH) {
-        loadMoreProducts(); // Load from the next collection
-        loadPreviousProducts(); // Load from the previous collection (if applicable)
-      }
-    }
+    function handleScroll() {
+      const st = window.pageYOffset || document.documentElement.scrollTop;
+      if (!isLoading) {
+        if (st > lastScrollTop) {
+          // Scrolling down
+          if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+            loadMoreProducts();
+          }
+        } else {
+          // Scrolling up
+          if (window.scrollY < 500) {
+            loadPreviousProducts();
+          }
+        }
+      }
+      lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
+    }
 
     function selectCategory(category, element) {
       // Remove active class from all parent buttons
@@ -238,28 +230,23 @@
       fetch(url)
         .then(response => response.text())
         .then(html => {
-            const allProducts = newProductsSection.querySelectorAll('.grid__item');
-            const productsToRender = Array.from(allProducts).slice(startIndex, endIndex + 1);
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
+          const itemsContainer = document.getElementById('items-container');
           
           if (newProductsSection) {
-            // Extract only the required number of products 
-            const allProducts = newProductsSection.querySelectorAll('.grid__item');
-            const productsToRender = Array.from(allProducts).slice(startIndex, endIndex + 1); // Use startIndex and endIndex from lazyLoadProducts
-
-            itemsContainer.innerHTML = ''; // Clear the container
-            productsToRender.forEach(product => itemsContainer.appendChild(product));
-          } else {
-            itemsContainer.innerHTML += '<p>No products found</p>';
-          }
-
-          isLoading = false;
+            itemsContainer.innerHTML += newProductsSection.innerHTML;
+          } else {
+            itemsContainer.innerHTML += '<p>No products found</p>';
+          }
+          isLoading = false;
         })
         .catch(error => {
           console.error('Error fetching products:', error);
           isLoading = false;
         });
     }
-
   </script>
 </body>
 </html>

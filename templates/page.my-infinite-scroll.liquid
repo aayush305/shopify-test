@@ -89,8 +89,9 @@
     let isLoading = false;
     let lastScrollTop = 0;
     let productsPerPage = 15; // Number of products to load per page
-    let currentPage = 1; // Current page number for pagination
     let totalProductsToLoad = 45; // Total products to keep in view
+    let loadedProducts = [];
+    let currentPage = 1; // Current page number for pagination
     let bufferZone = 500; // Preload buffer zone
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -135,8 +136,9 @@
       // Store the active category
       activeCategory = category;
 
-      // Reset pagination
+      // Reset pagination and loaded products
       currentPage = 1;
+      loadedProducts = [];
 
       // Show sub-collections if available
       showSubCollections(category);
@@ -191,16 +193,19 @@
       // Add active class to the clicked sub-category button
       element.classList.add('active');
 
-      // Reset pagination
+      // Reset pagination and loaded products
       currentPage = 1;
+      loadedProducts = [];
 
       // Fetch and render products by sub-category
       fetchAndRenderProducts(subCategory, true);
     }
 
     function loadMoreProducts() {
-      if (currentSubIndex < activeSubCollections.length) {
-        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+      if (loadedProducts.length < totalProductsToLoad) {
+        fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
+      } else if (currentSubIndex < activeSubCollections.length - 1) {
+        currentSubIndex++;
         fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
       } else {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -216,16 +221,14 @@
     function loadPreviousProducts() {
       if (currentSubIndex > 0) {
         currentSubIndex--;
-        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
-        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
+        fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
       } else {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
         if (currentParentIndex > 0) {
           currentParentIndex--;
           selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
           currentSubIndex = activeSubCollections.length - 1;
-          const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
-          selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
+          fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
         }
       }
     }
@@ -250,6 +253,12 @@
             } else {
               itemsContainer.innerHTML += newProductsSection.innerHTML; // Append new content
             }
+
+            loadedProducts = itemsContainer.querySelectorAll('.grid__item');
+            if (loadedProducts.length < totalProductsToLoad) {
+              currentPage++;
+              fetchAndRenderProducts(category, isSubCategory);
+            }
           } else {
             if (currentPage === 1) {
               itemsContainer.innerHTML = '<p>No products found</p>';
@@ -257,21 +266,11 @@
           }
 
           isLoading = false;
-          currentPage++;
-          checkAndPreloadNextSection();
         })
         .catch(error => {
           console.error('Error fetching products:', error);
           isLoading = false;
         });
-    }
-
-    function checkAndPreloadNextSection() {
-      const itemsContainer = document.getElementById('items-container');
-      const totalProducts = itemsContainer.querySelectorAll('.grid__item').length;
-      if (totalProducts < totalProductsToLoad) {
-        loadMoreProducts();
-      }
     }
   </script>
 </body>

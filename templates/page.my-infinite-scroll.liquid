@@ -134,9 +134,9 @@
 
       const subCollections = {
         'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
-        'baked-fish': ['Baked FIsh'],
-        'ground-fish': ['Ground Fish'],
-        'seasonings': ['Seasonings'],
+        'baked-fish': ['Baked Salmon', 'Baked Cod'],
+        'ground-fish': ['Ground Salmon', 'Ground Cod'],
+        'seasonings': ['Salt', 'Pepper'],
         // Add other collections and their sub-collections here as needed
       };
 
@@ -183,7 +183,8 @@
 
     function loadMoreProducts() {
       if (currentSubIndex < activeSubCollections.length) {
-        selectSubCategory(activeSubCollections[currentSubIndex], document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`));
+        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
         currentSubIndex++;
       } else {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -199,14 +200,16 @@
     function loadPreviousProducts() {
       if (currentSubIndex > 0) {
         currentSubIndex--;
-        selectSubCategory(activeSubCollections[currentSubIndex], document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`));
+        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
       } else {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
         if (currentParentIndex > 0) {
           currentParentIndex--;
           selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
           currentSubIndex = activeSubCollections.length - 1;
-          selectSubCategory(activeSubCollections[currentSubIndex], document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`));
+          const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+          selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
         }
       }
     }

@@ -52,11 +52,11 @@
       width: calc(50% - var(--grid-desktop-horizontal-spacing)* 3 / 4) !important;
       max-width: calc(50% - var(--grid-desktop-horizontal-spacing)* 3 / 4) !important;
     }
-    .section-main-collection-product-grid-padding{
+    .section-main-collection-product-grid-padding{ 
         padding: 0px !important;
         margin: 0px !important;
     }
-    #main-collection-filters{
+    #main-collection-filters {
         display: none;
     }
   </style>
@@ -190,7 +190,7 @@
 
     function loadMoreProducts() {
       if (currentSubIndex < activeSubCollections.length) {
-        const subCategoryButton = document.querySelector(.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]);
+        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
         selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
         currentSubIndex++;
       } else {
@@ -207,7 +207,7 @@
     function loadPreviousProducts() {
       if (currentSubIndex > 0) {
         currentSubIndex--;
-        const subCategoryButton = document.querySelector(.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]);
+        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
         selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
       } else {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -215,7 +215,7 @@
           currentParentIndex--;
           selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
           currentSubIndex = activeSubCollections.length - 1;
-          const subCategoryButton = document.querySelector(.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]);
+          const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
           selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
         }
       }
@@ -224,8 +224,8 @@
     function fetchAndRenderProducts(category, isSubCategory) {
       isLoading = true;
       const url = isSubCategory
-        ? /collections/${category}/products?section_id=main-collection-product-grid
-        : /collections/${category}/products?section_id=main-collection-product-grid;
+        ? `/collections/${category}/products?section_id=main-collection-product-grid`
+        : `/collections/${category}/products?section_id=main-collection-product-grid`;
 
       fetch(url)
         .then(response => response.text())

@@ -83,6 +83,7 @@
 
   <script>
     let activeCategory = null;
+    let activeSubCategory = null;
     let activeSubCollections = [];
     let currentParentIndex = 0;
     let currentSubIndex = 0;
@@ -120,10 +121,16 @@
       document.querySelectorAll('#parent-collections .filter-button').forEach(button => {
         button.classList.remove('active');
       });
-
       element.classList.add('active');
       activeCategory = category;
 
+      activeSubCategory = null;
+      currentParentIndex = Array.from(document.querySelectorAll('#parent-collections .filter-button')).indexOf(element);
+      currentSubIndex = 0;
+      productsBuffer = [];
+      totalProductsLoaded = 0;
+      document.getElementById('items-container').innerHTML = '';
+      
       showSubCollections(category);
     }
 
@@ -157,11 +164,10 @@
           subCollectionItem.appendChild(subCollectionButton);
           subCollectionList.appendChild(subCollectionItem);
         });
-        currentSubIndex = 0;
-        productsBuffer = [];
         loadMoreProducts();
       } else {
         subCollectionList.classList.add('hidden');
+        loadMoreProducts();
       }
     }
 
@@ -171,6 +177,12 @@
       });
 
       element.classList.add('active');
+      activeSubCategory = subCategory;
+      currentSubIndex = Array.from(document.querySelectorAll('.sub-collection-item .filter-button')).indexOf(element);
+      productsBuffer = [];
+      totalProductsLoaded = 0;
+      document.getElementById('items-container').innerHTML = '';
+      
       fetchAndRenderProducts(subCategory, true);
     }
 

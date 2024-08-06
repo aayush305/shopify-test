@@ -80,6 +80,7 @@
     let currentParentIndex = 0;
     let currentSubIndex = 0;
     let isLoading = false;
+    let lastScrollTop = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -94,9 +95,21 @@
     });
 
     function handleScroll() {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500 && !isLoading) {
-        loadMoreProducts();
+      const st = window.pageYOffset || document.documentElement.scrollTop;
+      if (!isLoading) {
+        if (st > lastScrollTop) {
+          // Scrolling down
+          if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+            loadMoreProducts();
+          }
+        } else {
+          // Scrolling up
+          if (window.scrollY < 500) {
+            loadPreviousProducts();
+          }
+        }
       }
+      lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
     }
 
     function selectCategory(category, element) {
@@ -179,6 +192,21 @@
           selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
         } else {
           console.log('All collections and sub-collections have been loaded.');
+        }
+      }
+    }
+
+    function loadPreviousProducts() {
+      if (currentSubIndex > 0) {
+        currentSubIndex--;
+        selectSubCategory(activeSubCollections[currentSubIndex], document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`));
+      } else {
+        const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
+        if (currentParentIndex > 0) {
+          currentParentIndex--;
+          selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
+          currentSubIndex = activeSubCollections.length - 1;
+          selectSubCategory(activeSubCollections[currentSubIndex], document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`));
         }
       }
     }

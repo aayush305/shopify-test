@@ -42,7 +42,8 @@
       border: 1px solid #ccc;
     }
     .sub-collection-item .filter-button.active {
-      border-color: red;
+      background-color: red;
+      color: white;
     }
     .hidden {
       display: none;
@@ -99,12 +100,12 @@
     }
 
     function selectCategory(category, element) {
-      // Remove active class from all buttons
-      document.querySelectorAll('.filter-button').forEach(button => {
+      // Remove active class from all parent buttons
+      document.querySelectorAll('#parent-collections .filter-button').forEach(button => {
         button.classList.remove('active');
       });
 
-      // Add active class to the clicked button
+      // Add active class to the clicked parent button
       element.classList.add('active');
 
       // Store the active category

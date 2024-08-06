@@ -88,6 +88,9 @@
     let currentSubIndex = 0;
     let isLoading = false;
     let lastScrollTop = 0;
+    let totalProducts = 0;
+    let buffer = 15;
+    let productsBuffer = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -104,16 +107,12 @@
     function handleScroll() {
       const st = window.pageYOffset || document.documentElement.scrollTop;
       if (!isLoading) {
-        if (st > lastScrollTop) {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
           // Scrolling down
-          if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-            loadMoreProducts();
-          }
-        } else {
+          loadMoreProducts();
+        } else if (window.scrollY < 500) {
           // Scrolling up
-          if (window.scrollY < 500) {
-            loadPreviousProducts();
-          }
+          loadPreviousProducts();
         }
       }
       lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
@@ -189,36 +188,56 @@
     }
 
     function loadMoreProducts() {
-      if (currentSubIndex < activeSubCollections.length) {
-        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
-        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
-        currentSubIndex++;
-      } else {
-        const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
-        if (currentParentIndex < parentCollections.length - 1) {
-          currentParentIndex++;
-          selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
+      if (productsBuffer.length < 45) {
+        // Fetch products for current and next sub-categories
+        if (currentSubIndex < activeSubCollections.length) {
+          const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+          selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
+          currentSubIndex++;
         } else {
-          console.log('All collections and sub-collections have been loaded.');
+          const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
+          if (currentParentIndex < parentCollections.length - 1) {
+            currentParentIndex++;
+            selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
+          } else {
+            console.log('All collections and sub-collections have been loaded.');
+          }
         }
+      } else {
+        // Render products from buffer
+        renderProductsFromBuffer();
       }
     }
 
     function loadPreviousProducts() {
-      if (currentSubIndex > 0) {
-        currentSubIndex--;
-        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
-        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
-      } else {
-        const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
-        if (currentParentIndex > 0) {
-          currentParentIndex--;
-          selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
-          currentSubIndex = activeSubCollections.length - 1;
+      if (productsBuffer.length < 45) {
+        // Fetch products for previous sub-categories
+        if (currentSubIndex > 0) {
+          currentSubIndex--;
           const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
           selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
+        } else {
+          const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
+          if (currentParentIndex > 0) {
+            currentParentIndex--;
+            selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
+            currentSubIndex = activeSubCollections.length - 1;
+            const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
+            selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
+          }
         }
+      } else {
+        // Render products from buffer
+        renderProductsFromBuffer();
       }
+    }
+
+    function renderProductsFromBuffer() {
+      const itemsContainer = document.getElementById('items-container');
+      const productsToRender = productsBuffer.splice(0, 15);
+      productsToRender.forEach(product => {
+        itemsContainer.innerHTML += product;
+      });
     }
 
     function fetchAndRenderProducts(category, isSubCategory) {
@@ -233,13 +252,12 @@
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
           const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
-          const itemsContainer = document.getElementById('items-container');
-          
           if (newProductsSection) {
-            itemsContainer.innerHTML += newProductsSection.innerHTML;
+            productsBuffer.push(...Array.from(newProductsSection.children).map(child => child.outerHTML));
           } else {
-            itemsContainer.innerHTML += '<p>No products found</p>';
+            productsBuffer.push('<p>No products found</p>');
           }
+          renderProductsFromBuffer();
           isLoading = false;
         })
         .catch(error => {

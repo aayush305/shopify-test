@@ -59,7 +59,6 @@
     #main-collection-filters{
         display: none;
     }
-
   </style>
 </head>
 <body>
@@ -215,6 +214,8 @@
         if (currentParentIndex > 0) {
           currentParentIndex--;
           selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
+          activeSubCollections = [];
+          showSubCollections(parentCollections[currentParentIndex].dataset.category);
           currentSubIndex = activeSubCollections.length - 1;
           const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
           selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);

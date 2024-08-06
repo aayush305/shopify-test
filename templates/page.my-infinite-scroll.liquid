@@ -170,7 +170,7 @@
 
     function loadMoreProducts() {
       if (currentSubIndex < activeSubCollections.length) {
-        fetchAndRenderProducts(activeSubCollections[currentSubIndex], true);
+        selectSubCategory(activeSubCollections[currentSubIndex], document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`));
         currentSubIndex++;
       } else {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');

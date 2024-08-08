@@ -214,11 +214,12 @@
               const newUl = newProductsSection.querySelector('ul');
 
               if (existingUl && newUl) {
-                // Append only <li> elements from the new <ul> to the existing <ul>
-                const newLiElements = newUl.querySelectorAll('li');
-                newLiElements.forEach((li) => {
-                  existingUl.appendChild(li);
+                // Use document fragments to append the <li> elements
+                const fragment = document.createDocumentFragment();
+                newUl.querySelectorAll('li').forEach((li) => {
+                  fragment.appendChild(li);
                 });
+                existingUl.appendChild(fragment);
               } else {
                 // Append the whole section as it is if no <ul> exists in itemsContainer
                 itemsContainer.innerHTML += newProductsSection.innerHTML;

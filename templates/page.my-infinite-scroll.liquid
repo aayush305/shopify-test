@@ -1,262 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Infinite Scroll Page</title>
-  <style>
-    .sticky-header {
-      position: sticky;
-      top: 0;
-      background-color: #fff;
-      z-index: 1000;
-      padding: 10px;
-      border-bottom: 1px solid #ccc;
-      text-align: center;
-    }
-    .collection-list, .sub-collection-list {
-      display: flex;
-      justify-content: center;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .collection-item, .sub-collection-item {
-      margin: 0 5px;
-    }
-    .filter-button {
-      cursor: pointer;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      margin: 2px;
-      border-radius: 3px;
-    }
-    .filter-button.active {
-      background-color: #0056b3;
-    }
-    .sub-collection-item .filter-button {
-      background-color: white;
-      color: black;
-      border: 1px solid #ccc;
-    }
-    .sub-collection-item .filter-button.active {
-      background-color: red;
-      color: white;
-    }
-    .hidden {
-      display: none;
-    }
-    .grid__item {
-      width: calc(50% - var(--grid-desktop-horizontal-spacing)* 3 / 4) !important;
-      max-width: calc(50% - var(--grid-desktop-horizontal-spacing)* 3 / 4) !important;
-    }
-    .section-main-collection-product-grid-padding{
-        padding: 0px !important;
-        margin: 0px !important;
-    }
-    #main-collection-filters{
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Infinite Scroll Page</title>
+    <style>
+      .sticky-header {
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+        z-index: 1000;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+        text-align: center;
+      }
+      .collection-list,
+      .sub-collection-list {
+        display: flex;
+        justify-content: center;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .collection-item,
+      .sub-collection-item {
+        margin: 0 5px;
+      }
+      .filter-button {
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        margin: 2px;
+        border-radius: 3px;
+      }
+      .filter-button.active {
+        background-color: #0056b3;
+      }
+      .sub-collection-item .filter-button {
+        background-color: white;
+        color: black;
+        border: 1px solid #ccc;
+      }
+      .sub-collection-item .filter-button.active {
+        background-color: red;
+        color: white;
+      }
+      .hidden {
         display: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="sticky-header">
-    <h2>Collections</h2>
-    <ul class="collection-list" id="parent-collections">
-      {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasonings" | split: ":" %}
-      {% for collection in collections %}
-        <li class="collection-item">
-          <button class="filter-button" data-category="{{ collection | handleize }}">{{ collection }}</button>
-        </li>
-      {% endfor %}
-    </ul>
-    <ul class="sub-collection-list hidden" id="sub-collection-list">
-      <!-- Sub-collections will be dynamically added here -->
-    </ul>
-  </div>
-
-  <div id="items-container">
-    <!-- Your items will be rendered here dynamically -->
-  </div>
-
-  <script>
-    let activeCategory = null;
-    let activeSubCollections = [];
-    let currentParentIndex = 0;
-    let currentSubIndex = 0;
-    let isLoading = false;
-    let lastScrollTop = 0;
-    let isScrollingDown = true;
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
-      if (parentCollections.length > 0) {
-        // Automatically select the first category
-        selectCategory(parentCollections[0].dataset.category, parentCollections[0]);
       }
-      window.addEventListener('scroll', handleScroll);
-      parentCollections.forEach(button => {
-        button.addEventListener('click', () => selectCategory(button.dataset.category, button));
-      });
-    });
-
-    function handleScroll() {
-      const st = window.pageYOffset || document.documentElement.scrollTop;
-      isScrollingDown = st > lastScrollTop;
-
-      if (!isLoading) {
-        if (isScrollingDown) {
-          // Scrolling down
-          if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-            loadMoreProducts();
-          }
-        } else {
-          // Scrolling up
-          if (window.scrollY < 500) {
-            loadPreviousProducts();
-          }
-        }
+      .grid__item {
+        width: calc(50% - var(--grid-desktop-horizontal-spacing) * 3 / 4) !important;
+        max-width: calc(50% - var(--grid-desktop-horizontal-spacing) * 3 / 4) !important;
       }
-
-      lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
-    }
-
-    function selectCategory(category, element) {
-      // Remove active class from all parent buttons
-      document.querySelectorAll('#parent-collections .filter-button').forEach(button => {
-        button.classList.remove('active');
-      });
-
-      // Add active class to the clicked parent button
-      element.classList.add('active');
-
-      // Store the active category
-      activeCategory = category;
-
-      // Show sub-collections if available
-      showSubCollections(category);
-    }
-
-    function showSubCollections(category) {
-      const subCollectionList = document.getElementById('sub-collection-list');
-      subCollectionList.classList.remove('hidden');
-
-      const subCollections = {
-        'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
-        'baked-fish': ['Baked FIsh'],
-        'ground-fish': ['Ground Fish'],
-        'seasonings': ['Seasonings'],
-        // Add other collections and their sub-collections here as needed
-      };
-
-      // Clear previous sub-collections
-      subCollectionList.innerHTML = '';
-      activeSubCollections = [];
-
-      if (subCollections[category]) {
-        subCollections[category].forEach((subCollection) => {
-          activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
-
-          // Display sub-collections
-          const subCollectionItem = document.createElement('li');
-          subCollectionItem.classList.add('sub-collection-item');
-
-          const subCollectionButton = document.createElement('button');
-          subCollectionButton.classList.add('filter-button');
-          subCollectionButton.textContent = subCollection;
-          subCollectionButton.dataset.category = subCollection.toLowerCase().replace(/\s+/g, '-');
-          subCollectionButton.onclick = () => selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
-
-          subCollectionItem.appendChild(subCollectionButton);
-          subCollectionList.appendChild(subCollectionItem);
-        });
-        currentSubIndex = 0;
-        loadMoreProducts();
-      } else {
-        subCollectionList.classList.add('hidden');
+      .section-main-collection-product-grid-padding {
+        padding: 0 !important;
+        margin: 0 !important;
       }
-    }
+      #main-collection-filters {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sticky-header">
+      <h2>Collections</h2>
+      <ul class="collection-list" id="parent-collections">
+        {% assign collections = "Fresh Fish:Baked Fish:Ground Fish:Seasonings" | split: ":" %}
+        {% for collection in collections %}
+          <li class="collection-item">
+            <button class="filter-button" data-category="{{ collection | handleize }}">{{ collection }}</button>
+          </li>
+        {% endfor %}
+      </ul>
+      <ul class="sub-collection-list hidden" id="sub-collection-list">
+        <!-- Sub-collections will be dynamically added here -->
+      </ul>
+    </div>
 
-    function selectSubCategory(subCategory, element) {
-      // Remove active class from all sub-category buttons
-      document.querySelectorAll('.sub-collection-item .filter-button').forEach(button => {
-        button.classList.remove('active');
-      });
+    <div id="items-container">
+      <!-- Your items will be rendered here dynamically -->
+    </div>
 
-      // Add active class to the clicked sub-category button
-      element.classList.add('active');
+    <script>
+      let activeCategory = 'fresh-fish'; // Default to the first category
+      let activeSubCategory = 'baby-salmon'; // Default to the first subcategory
+      let isLoading = false;
 
-      // Fetch and render products by sub-category
-      fetchAndRenderProducts(subCategory, true);
-    }
-
-    function loadMoreProducts() {
-      if (currentSubIndex < activeSubCollections.length) {
-        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
-        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
-        currentSubIndex++;
-      } else {
+      document.addEventListener('DOMContentLoaded', () => {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
-        if (currentParentIndex < parentCollections.length - 1) {
-          currentParentIndex++;
-          selectCategory(parentCollections[currentParentIndex].dataset.category, parentCollections[currentParentIndex]);
-        } else {
-          console.log('All collections and sub-collections have been loaded.');
+        const firstCategoryButton = parentCollections[0];
+        const firstSubCategoryButton = document.querySelector('#sub-collection-list .filter-button');
+
+        if (firstCategoryButton) {
+          activeCategory = firstCategoryButton.dataset.category;
+          firstCategoryButton.classList.add('active');
         }
-      }
-    }
 
-    function loadPreviousProducts() {
-      if (currentSubIndex > 0) {
-        currentSubIndex--;
-        const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
-        selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
-      } else {
-        const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
-        if (currentParentIndex > 0) {
-          currentParentIndex--;
-          activeCategory = parentCollections[currentParentIndex].dataset.category;
-          selectCategory(activeCategory, parentCollections[currentParentIndex]);
-          currentSubIndex = activeSubCollections.length - 1;
-          const subCategoryButton = document.querySelector(`.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`);
-          selectSubCategory(activeSubCollections[currentSubIndex], subCategoryButton);
+        if (firstSubCategoryButton) {
+          activeSubCategory = firstSubCategoryButton.dataset.category;
+          firstSubCategoryButton.classList.add('active');
         }
-      }
-    }
 
-    function fetchAndRenderProducts(category, isSubCategory) {
-      isLoading = true;
-      const url = isSubCategory
-        ? `/collections/${category}/products?section_id=main-collection-product-grid`
-        : `/collections/${category}/products?section_id=main-collection-product-grid`;
+        window.addEventListener('scroll', updateActiveCategoryAndSubcategory);
+      });
 
-      fetch(url)
-        .then(response => response.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
-          const itemsContainer = document.getElementById('items-container');
-          
-          if (newProductsSection) {
-            if (isScrollingDown) {
-              itemsContainer.innerHTML += newProductsSection.innerHTML;
-            } else {
-              itemsContainer.innerHTML = newProductsSection.innerHTML + itemsContainer.innerHTML;
+      function updateActiveCategoryAndSubcategory() {
+        const itemsContainer = document.getElementById('items-container');
+        const productItems = itemsContainer.querySelectorAll('li[data-subcategory]');
+        const viewportHeight = window.innerHeight;
+
+        productItems.forEach(item => {
+          const rect = item.getBoundingClientRect();
+          if (rect.top >= 0 && rect.bottom <= viewportHeight) {
+            const subCategory = item.getAttribute('data-subcategory');
+            if (activeSubCategory !== subCategory) {
+              activeSubCategory = subCategory;
+              highlightActiveCategoryAndSubcategory();
             }
-          } else {
-            itemsContainer.innerHTML += '<p>No products found</p>';
           }
-          isLoading = false;
-        })
-        .catch(error => {
-          console.error('Error fetching products:', error);
-          isLoading = false;
         });
-    }
-  </script>
-</body>
+      }
+
+      function highlightActiveCategoryAndSubcategory() {
+        // Highlight active category
+        document.querySelectorAll('#parent-collections .filter-button').forEach(button => {
+          if (button.dataset.category === activeCategory) {
+            button.classList.add('active');
+          } else {
+            button.classList.remove('active');
+          }
+        });
+
+        // Highlight active subcategory
+        document.querySelectorAll('#sub-collection-list .filter-button').forEach(button => {
+          if (button.dataset.category === activeSubCategory) {
+            button.classList.add('active');
+          } else {
+            button.classList.remove('active');
+          }
+        });
+      }
+    </script>
+  </body>
 </html>
-``

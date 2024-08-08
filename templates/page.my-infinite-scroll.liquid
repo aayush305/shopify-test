@@ -63,7 +63,7 @@
     <div class="sticky-header">
       <h2>Collections</h2>
       <ul class="collection-list" id="parent-collections">
-        {% assign collections = 'Fresh Fish:Baked Fish:Ground Fish:Seasonings' | split: ':' %}
+        {% assign collections = 'Fresh Fish:Seasonings:Baked Fish:Ground Fish' | split: ':' %}
         {% for collection in collections %}
           <li class="collection-item">
             <button class="filter-button" data-category="{{ collection | handleize }}">{{ collection }}</button>
@@ -126,9 +126,9 @@
 
         const subCollections = {
           'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
+          seasonings: ['Seasonings'],
           'baked-fish': ['Baked FIsh'],
           'ground-fish': ['Ground Fish'],
-          seasonings: ['Seasonings'],
           // Add other collections and their sub-collections here as needed
         };
 

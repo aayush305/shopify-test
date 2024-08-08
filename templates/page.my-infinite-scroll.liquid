@@ -216,6 +216,8 @@
               if (existingUl && newUl) {
                 // Appending each <li> element to the existing <ul>
                 const newLiElements = newUl.querySelectorAll('li');
+                console.log('newLiElements',newLiElements);
+                console.log('existingUl',existingUl);
                 newLiElements.forEach((li) => {
                   existingUl.appendChild(li.cloneNode(true));
                 });

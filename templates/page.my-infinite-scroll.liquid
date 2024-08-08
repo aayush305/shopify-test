@@ -85,6 +85,7 @@
       let currentParentIndex = 0;
       let currentSubIndex = 0;
       let isLoading = false;
+      let initialLoadComplete = false;
 
       document.addEventListener('DOMContentLoaded', () => {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -127,7 +128,7 @@
         const subCollections = {
           'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
           seasonings: ['Seasonings'],
-          'baked-fish': ['Baked FIsh'],
+          'baked-fish': ['Baked Fish'],
           'ground-fish': ['Ground Fish'],
           // Add other collections and their sub-collections here as needed
         };
@@ -155,13 +156,14 @@
             subCollectionList.appendChild(subCollectionItem);
           });
           currentSubIndex = 0;
-          loadMoreProducts();
+          initialLoadComplete = false;
+          loadMoreProducts(30); // Load the initial 30 products
         } else {
           subCollectionList.classList.add('hidden');
         }
       }
 
-      function selectSubCategory(subCategory, element) {
+      function selectSubCategory(subCategory, element, remainingProductsToLoad = 0) {
         // Remove active class from all sub-category buttons
         document.querySelectorAll('.sub-collection-item .filter-button').forEach((button) => {
           button.classList.remove('active');
@@ -171,19 +173,19 @@
         element.classList.add('active');
 
         // Fetch and render products by sub-category
-        fetchAndRenderProducts(subCategory, true);
+        fetchAndRenderProducts(subCategory, remainingProductsToLoad, true);
       }
 
-      function loadMoreProducts() {
-        if (currentSubIndex < activeSubCollections.length) {
+      function loadMoreProducts(remainingProductsToLoad = 30) {
+        if (currentSubIndex < activeSubCollections.length && remainingProductsToLoad > 0) {
           selectSubCategory(
             activeSubCollections[currentSubIndex],
             document.querySelector(
               `.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`
-            )
+            ),
+            remainingProductsToLoad
           );
-          currentSubIndex++;
-        } else {
+        } else if (initialLoadComplete && currentSubIndex >= activeSubCollections.length) {
           const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
           if (currentParentIndex < parentCollections.length - 1) {
             currentParentIndex++;
@@ -197,9 +199,9 @@
         }
       }
 
-      function fetchAndRenderProducts(category) {
+      function fetchAndRenderProducts(category, remainingProductsToLoad, isInitialLoad = false) {
         isLoading = true;
-        const url = `/collections/${category}/products?section_id=main-collection-product-grid`;
+        const url = `/collections/${category}/products?section_id=main-collection-product-grid&limit=${remainingProductsToLoad}`;
 
         fetch(url)
           .then((response) => response.text())
@@ -209,12 +211,26 @@
             const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
             const itemsContainer = document.getElementById('items-container');
 
+            let fetchedProductsCount = 0;
+
             if (newProductsSection) {
+              const productItems = newProductsSection.querySelectorAll('.product-item');
+              fetchedProductsCount = productItems.length;
               itemsContainer.innerHTML += newProductsSection.innerHTML;
             } else {
               itemsContainer.innerHTML += '<p>No products found</p>';
             }
+
             isLoading = false;
+
+            if (isInitialLoad) {
+              if (fetchedProductsCount < remainingProductsToLoad) {
+                currentSubIndex++;
+                loadMoreProducts(remainingProductsToLoad - fetchedProductsCount);
+              } else {
+                initialLoadComplete = true;
+              }
+            }
           })
           .catch((error) => {
             console.error('Error fetching products:', error);

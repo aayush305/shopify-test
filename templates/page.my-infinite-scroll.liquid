@@ -91,20 +91,20 @@
       document.addEventListener('DOMContentLoaded', () => {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
         const firstCategoryButton = parentCollections[0];
-        const firstSubCategoryButton = document.querySelector('#sub-collection-list .filter-button');
 
         if (firstCategoryButton) {
           activeCategory = firstCategoryButton.dataset.category;
           firstCategoryButton.classList.add('active');
         }
 
-        if (firstSubCategoryButton) {
-          activeSubCategory = firstSubCategoryButton.dataset.category;
-          firstSubCategoryButton.classList.add('active');
-        }
+        loadInitialProducts();
 
         window.addEventListener('scroll', updateActiveCategoryAndSubcategory);
       });
+
+      function loadInitialProducts() {
+        fetchAndRenderProducts(activeCategory, false);
+      }
 
       function updateActiveCategoryAndSubcategory() {
         const itemsContainer = document.getElementById('items-container');
@@ -144,6 +144,7 @@
       }
 
       function fetchAndRenderProducts(category, isSubCategory) {
+        if (isLoading) return;
         isLoading = true;
         const url = isSubCategory
           ? `/collections/${category}/products?section_id=main-collection-product-grid`
@@ -159,6 +160,7 @@
             
             if (newProductsSection) {
               itemsContainer.innerHTML += newProductsSection.innerHTML;
+              updateActiveCategoryAndSubcategory();
             } else {
               itemsContainer.innerHTML += '<p>No products found</p>';
             }

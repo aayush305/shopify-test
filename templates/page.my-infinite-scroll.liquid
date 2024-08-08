@@ -210,23 +210,7 @@
             const itemsContainer = document.getElementById('items-container');
 
             if (newProductsSection) {
-              const existingUl = itemsContainer.querySelector('ul');
-              const newUl = newProductsSection.querySelector('ul');
-
-              if (existingUl && newUl) {
-                // Appending each <li> element to the existing <ul>
-                const newLiElements = newUl.querySelectorAll('li');
-                console.log('newLiElements',newLiElements);
-                console.log('existingUl',existingUl);
-                newLiElements.forEach((li) => {
-                  existingUl.appendChild(li.cloneNode(true));
-                });
-                console.log('New <li> elements appended to existing <ul>.');
-              } else {
-                // If no existing <ul>, or if there's no new <ul>, append the whole section
-                itemsContainer.innerHTML += newProductsSection.innerHTML;
-                console.log('No existing <ul> found. Appending new section.');
-              }
+              itemsContainer.innerHTML += newProductsSection.innerHTML;
             } else {
               itemsContainer.innerHTML += '<p>No products found</p>';
             }

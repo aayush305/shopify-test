@@ -99,7 +99,7 @@
       });
 
       function handleScroll() {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1500 && !isLoading) {
           loadMoreProducts();
         }
       }
@@ -136,7 +136,7 @@
         subCollectionList.innerHTML = '';
         activeSubCollections = [];
 
-        if (subCollections[category] && subCollections[category].length > 1) {
+        if (subCollections[category]) {
           subCollections[category].forEach((subCollection) => {
             activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
 

@@ -136,7 +136,7 @@
         subCollectionList.innerHTML = '';
         activeSubCollections = [];
 
-        if (subCollections[category] && subCollections[category].length > 0) {
+        if (subCollections[category] && subCollections[category].length > 1) {
           subCollections[category].forEach((subCollection) => {
             activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
 

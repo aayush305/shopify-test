@@ -210,7 +210,19 @@
             const itemsContainer = document.getElementById('items-container');
 
             if (newProductsSection) {
-              itemsContainer.innerHTML += newProductsSection.innerHTML;
+              const existingUl = itemsContainer.querySelector('ul');
+              const newUl = newProductsSection.querySelector('ul');
+
+              if (existingUl && newUl) {
+                // Append only <li> elements from the new <ul> to the existing <ul>
+                const newLiElements = newUl.querySelectorAll('li');
+                newLiElements.forEach((li) => {
+                  existingUl.appendChild(li);
+                });
+              } else {
+                // Append the whole section as it is if no <ul> exists in itemsContainer
+                itemsContainer.innerHTML += newProductsSection.innerHTML;
+              }
             } else {
               itemsContainer.innerHTML += '<p>No products found</p>';
             }

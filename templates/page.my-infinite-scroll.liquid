@@ -92,7 +92,6 @@
       document.addEventListener('DOMContentLoaded', () => {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
         if (parentCollections.length > 0) {
-          // Automatically select the first category
           selectCategory(parentCollections[0].dataset.category, parentCollections[0]);
         }
         window.addEventListener('scroll', handleScroll);
@@ -105,46 +104,39 @@
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !isLoading) {
           loadMoreProducts();
         }
-        const firstVisibleLI = getFirstVisibleLI(); 
-         if (firstVisibleLI) {
-        // Get the dataSet attribute from the <li> element
-        const dataSet = firstVisibleLI.getAttribute('dataClass');
+        const firstVisibleLI = getFirstVisibleLI();
+        if (firstVisibleLI) {
+          const dataSet = firstVisibleLI.getAttribute('dataClass');
 
-        console.log("First visible <li> dataSet:", dataSet);
-
-        // You can perform additional actions with the dataSet here if needed
-    }
+          console.log('First visible <li> dataSet:', dataSet);
+        }
       }
 
       function getFirstVisibleLI() {
         const gridData = document.getElementById('items-container');
         const gridElements = gridData.getElementsByClassName('product-grid');
         for (let grid of gridElements) {
-            const liElements = grid.querySelectorAll('li');
-            for (let li of liElements) {
-                const rect = li.getBoundingClientRect();
-                console.log("rect.top",rect.top," rect.bottom",rect.bottom,"window.innerHeight",window.innerHeight);
-                if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
-                    return li; // Return the first visible <li> element
-                }
+          const liElements = grid.querySelectorAll('li');
+          for (let li of liElements) {
+            const rect = li.getBoundingClientRect();
+            console.log('rect.top', rect.top, ' rect.bottom', rect.bottom, 'window.innerHeight', window.innerHeight);
+            if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+              return li;
             }
+          }
         }
         return null;
-    }
+      }
 
       function selectCategory(category, element) {
-        // Remove active class from all parent buttons
         document.querySelectorAll('#parent-collections .filter-button').forEach((button) => {
           button.classList.remove('active');
         });
 
-        // Add active class to the clicked parent button
         element.classList.add('active');
 
-        // Store the active category
         activeCategory = category;
 
-        // Show sub-collections if available
         showSubCollections(category);
       }
 
@@ -157,10 +149,8 @@
           seasonings: ['Seasonings'],
           'baked-fish': ['Baked Fish'],
           'ground-fish': ['Ground Fish'],
-          // Add other collections and their sub-collections here as needed
         };
 
-        // Clear previous sub-collections
         subCollectionList.innerHTML = '';
         activeSubCollections = [];
 
@@ -168,7 +158,6 @@
           subCollections[category].forEach((subCollection) => {
             activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
 
-            // Display sub-collections
             const subCollectionItem = document.createElement('li');
             subCollectionItem.classList.add('sub-collection-item');
 
@@ -184,7 +173,7 @@
           });
           currentSubIndex = 0;
           totalProductsLoaded = 0;
-          if(initialCall){
+          if (initialCall) {
             initialCall = false;
             loadMoreProducts();
           }
@@ -194,15 +183,12 @@
       }
 
       function selectSubCategory(subCategory, element) {
-        // Remove active class from all sub-category buttons
         document.querySelectorAll('.sub-collection-item .filter-button').forEach((button) => {
           button.classList.remove('active');
         });
 
-        // Add active class to the clicked sub-category button
         element.classList.add('active');
 
-        // Fetch and render products by sub-category
         fetchAndRenderProducts(subCategory);
       }
 

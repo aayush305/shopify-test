@@ -105,7 +105,30 @@
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !isLoading) {
           loadMoreProducts();
         }
+        const firstVisibleLI = getFirstVisibleLI(); 
+         if (firstVisibleLI) {
+        // Get the dataSet attribute from the <li> element
+        const dataSet = firstVisibleLI.getAttribute('dataSet');
+
+        console.log("First visible <li> dataSet:", dataSet);
+
+        // You can perform additional actions with the dataSet here if needed
+    }
       }
+
+      function getFirstVisibleLI() {
+        const ulElements = document.querySelectorAll('ul');
+        for (let ul of ulElements) {
+            const liElements = ul.querySelectorAll('li');
+            for (let li of liElements) {
+                const rect = li.getBoundingClientRect();
+                if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+                    return li; // Return the first visible <li> element
+                }
+            }
+        }
+        return null; // No visible <li> found
+    }
 
       function selectCategory(category, element) {
         // Remove active class from all parent buttons

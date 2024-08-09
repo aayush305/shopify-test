@@ -78,13 +78,13 @@
     <div id="items-container">
       <!-- Your items will be rendered here dynamically -->
     </div>
-
-  <script>
+<script>
   let activeCategory = null;
   let activeSubCollections = [];
   let currentParentIndex = 0;
   let currentSubIndex = 0;
   let isLoading = false;
+  let totalProductsLoaded = 0;
 
   document.addEventListener('DOMContentLoaded', () => {
     const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -155,6 +155,7 @@
         subCollectionList.appendChild(subCollectionItem);
       });
       currentSubIndex = 0;
+      totalProductsLoaded = 0;
       loadMoreProducts(30);  // Load the initial 30 products
     } else {
       subCollectionList.classList.add('hidden');
@@ -174,7 +175,7 @@
     fetchAndRenderProducts(subCategory, remainingProductsToLoad);
   }
 
-  function loadMoreProducts(remainingProductsToLoad = 15) {
+  function loadMoreProducts(remainingProductsToLoad) {
     if (currentSubIndex < activeSubCollections.length && remainingProductsToLoad > 0) {
       selectSubCategory(
         activeSubCollections[currentSubIndex],
@@ -183,7 +184,7 @@
         ),
         remainingProductsToLoad
       );
-    } else if (currentSubIndex >= activeSubCollections.length) {
+    } else if (currentSubIndex >= activeSubCollections.length && totalProductsLoaded < 30) {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
       if (currentParentIndex < parentCollections.length - 1) {
         currentParentIndex++;
@@ -220,10 +221,13 @@
         }
 
         isLoading = false;
+        totalProductsLoaded += fetchedProductsCount;
 
         if (fetchedProductsCount < remainingProductsToLoad) {
           currentSubIndex++;
-          loadMoreProducts(remainingProductsToLoad - fetchedProductsCount);
+          if (totalProductsLoaded < 30) {
+            loadMoreProducts(remainingProductsToLoad - fetchedProductsCount);
+          }
         }
       })
       .catch((error) => {

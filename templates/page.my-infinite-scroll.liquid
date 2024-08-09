@@ -80,170 +80,162 @@
     </div>
 
     <script>
-      let activeCategory = null;
-      let activeSubCollections = [];
-      let currentParentIndex = 0;
-      let currentSubIndex = 0;
-      let isLoading = false;
-      let initialLoadComplete = false;
+  let activeCategory = null;
+  let activeSubCollections = [];
+  let currentParentIndex = 0;
+  let currentSubIndex = 0;
+  let isLoading = false;
+  let initialLoadComplete = false;
 
-      document.addEventListener('DOMContentLoaded', () => {
-        const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
-        if (parentCollections.length > 0) {
-          // Automatically select the first category
-          selectCategory(parentCollections[0].dataset.category, parentCollections[0]);
-        }
-        window.addEventListener('scroll', handleScroll);
-        parentCollections.forEach((button) => {
-          button.addEventListener('click', () => selectCategory(button.dataset.category, button));
-        });
+  document.addEventListener('DOMContentLoaded', () => {
+    const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
+    if (parentCollections.length > 0) {
+      // Automatically select the first category
+      selectCategory(parentCollections[0].dataset.category, parentCollections[0]);
+    }
+    window.addEventListener('scroll', handleScroll);
+    parentCollections.forEach((button) => {
+      button.addEventListener('click', () => selectCategory(button.dataset.category, button));
+    });
+  });
+
+  function handleScroll() {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1500 && !isLoading) {
+      loadMoreProducts(15);  // Fetch next 15 products on scroll
+    }
+  }
+
+  function selectCategory(category, element) {
+    // Remove active class from all parent buttons
+    document.querySelectorAll('#parent-collections .filter-button').forEach((button) => {
+      button.classList.remove('active');
+    });
+
+    // Add active class to the clicked parent button
+    element.classList.add('active');
+
+    // Store the active category
+    activeCategory = category;
+
+    // Show sub-collections if available
+    showSubCollections(category);
+  }
+
+  function showSubCollections(category) {
+    const subCollectionList = document.getElementById('sub-collection-list');
+    subCollectionList.classList.remove('hidden');
+
+    const subCollections = {
+      'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
+      seasonings: ['Seasonings'],
+      'baked-fish': ['Baked Fish'],
+      'ground-fish': ['Ground Fish'],
+      // Add other collections and their sub-collections here as needed
+    };
+
+    // Clear previous sub-collections
+    subCollectionList.innerHTML = '';
+    activeSubCollections = [];
+
+    if (subCollections[category]) {
+      subCollections[category].forEach((subCollection) => {
+        activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
+
+        // Display sub-collections
+        const subCollectionItem = document.createElement('li');
+        subCollectionItem.classList.add('sub-collection-item');
+
+        const subCollectionButton = document.createElement('button');
+        subCollectionButton.classList.add('filter-button');
+        subCollectionButton.textContent = subCollection;
+        subCollectionButton.dataset.category = subCollection.toLowerCase().replace(/\s+/g, '-');
+        subCollectionButton.onclick = () =>
+          selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
+
+        subCollectionItem.appendChild(subCollectionButton);
+        subCollectionList.appendChild(subCollectionItem);
       });
+      currentSubIndex = 0;
+      initialLoadComplete = false;
+      loadMoreProducts(30);  // Load the initial 30 products
+    } else {
+      subCollectionList.classList.add('hidden');
+    }
+  }
 
-      function handleScroll() {
-        console.log('Scrolling...', isLoading);
-        console.log(
-          window.innerHeight,
-          window.scrollY,
-          window.innerHeight + window.scrollY,
-          document.body.offsetHeight - 1500
+  function selectSubCategory(subCategory, element, remainingProductsToLoad = 0) {
+    // Remove active class from all sub-category buttons
+    document.querySelectorAll('.sub-collection-item .filter-button').forEach((button) => {
+      button.classList.remove('active');
+    });
+
+    // Add active class to the clicked sub-category button
+    element.classList.add('active');
+
+    // Fetch and render products by sub-category
+    fetchAndRenderProducts(subCategory, remainingProductsToLoad);
+  }
+
+  function loadMoreProducts(remainingProductsToLoad = 15) {
+    if (currentSubIndex < activeSubCollections.length && remainingProductsToLoad > 0) {
+      selectSubCategory(
+        activeSubCollections[currentSubIndex],
+        document.querySelector(
+          `.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`
+        ),
+        remainingProductsToLoad
+      );
+    } else if (initialLoadComplete && currentSubIndex >= activeSubCollections.length) {
+      const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
+      if (currentParentIndex < parentCollections.length - 1) {
+        currentParentIndex++;
+        selectCategory(
+          parentCollections[currentParentIndex].dataset.category,
+          parentCollections[currentParentIndex]
         );
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1500 && !isLoading) {
-          loadMoreProducts(15);
-        }
+      } else {
+        console.log('All collections and sub-collections have been loaded.');
       }
+    }
+  }
 
-      function selectCategory(category, element) {
-        // Remove active class from all parent buttons
-        document.querySelectorAll('#parent-collections .filter-button').forEach((button) => {
-          button.classList.remove('active');
-        });
+  function fetchAndRenderProducts(category, remainingProductsToLoad) {
+    isLoading = true;
+    const url = `/collections/${category}/products?section_id=main-collection-product-grid&limit=${remainingProductsToLoad}`;
 
-        // Add active class to the clicked parent button
-        element.classList.add('active');
+    fetch(url)
+      .then((response) => response.text())
+      .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
+        const itemsContainer = document.getElementById('items-container');
 
-        // Store the active category
-        activeCategory = category;
+        let fetchedProductsCount = 0;
 
-        // Show sub-collections if available
-        showSubCollections(category);
-      }
-
-      function showSubCollections(category) {
-        const subCollectionList = document.getElementById('sub-collection-list');
-        subCollectionList.classList.remove('hidden');
-
-        const subCollections = {
-          'fresh-fish': ['Baby Salmon', 'Fish', 'Atlantic Salmon'],
-          seasonings: ['Seasonings'],
-          'baked-fish': ['Baked Fish'],
-          'ground-fish': ['Ground Fish'],
-          // Add other collections and their sub-collections here as needed
-        };
-
-        // Clear previous sub-collections
-        subCollectionList.innerHTML = '';
-        activeSubCollections = [];
-
-        if (subCollections[category]) {
-          subCollections[category].forEach((subCollection) => {
-            activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
-
-            // Display sub-collections
-            const subCollectionItem = document.createElement('li');
-            subCollectionItem.classList.add('sub-collection-item');
-
-            const subCollectionButton = document.createElement('button');
-            subCollectionButton.classList.add('filter-button');
-            subCollectionButton.textContent = subCollection;
-            subCollectionButton.dataset.category = subCollection.toLowerCase().replace(/\s+/g, '-');
-            subCollectionButton.onclick = () =>
-              selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
-
-            subCollectionItem.appendChild(subCollectionButton);
-            subCollectionList.appendChild(subCollectionItem);
-          });
-          currentSubIndex = 0;
-          initialLoadComplete = false;
-          loadMoreProducts(30); // Load the initial 30 products
+        if (newProductsSection) {
+          const productItems = newProductsSection.querySelectorAll('.product-item');
+          fetchedProductsCount = productItems.length;
+          itemsContainer.innerHTML += newProductsSection.innerHTML;
         } else {
-          subCollectionList.classList.add('hidden');
+          itemsContainer.innerHTML += '<p>No products found</p>';
         }
-      }
 
-      function selectSubCategory(subCategory, element, remainingProductsToLoad = 0) {
-        // Remove active class from all sub-category buttons
-        document.querySelectorAll('.sub-collection-item .filter-button').forEach((button) => {
-          button.classList.remove('active');
-        });
+        isLoading = false;
 
-        // Add active class to the clicked sub-category button
-        element.classList.add('active');
-
-        // Fetch and render products by sub-category
-        fetchAndRenderProducts(subCategory, remainingProductsToLoad, true);
-      }
-
-      function loadMoreProducts(remainingProductsToLoad = 30) {
-        if (currentSubIndex < activeSubCollections.length && remainingProductsToLoad > 0) {
-          selectSubCategory(
-            activeSubCollections[currentSubIndex],
-            document.querySelector(
-              `.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`
-            ),
-            remainingProductsToLoad
-          );
-        } else if (initialLoadComplete && currentSubIndex >= activeSubCollections.length) {
-          const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
-          if (currentParentIndex < parentCollections.length - 1) {
-            currentParentIndex++;
-            selectCategory(
-              parentCollections[currentParentIndex].dataset.category,
-              parentCollections[currentParentIndex]
-            );
-          } else {
-            console.log('All collections and sub-collections have been loaded.');
-          }
+        if (fetchedProductsCount < remainingProductsToLoad) {
+          currentSubIndex++;
+          loadMoreProducts(remainingProductsToLoad - fetchedProductsCount);
+        } else {
+          initialLoadComplete = true;
         }
-      }
+      })
+      .catch((error) => {
+        console.error('Error fetching products:', error);
+        isLoading = false;
+      });
+  }
+</script>
 
-      function fetchAndRenderProducts(category, remainingProductsToLoad, isInitialLoad = false) {
-        isLoading = true;
-        const url = `/collections/${category}/products?section_id=main-collection-product-grid&limit=${remainingProductsToLoad}`;
-
-        fetch(url)
-          .then((response) => response.text())
-          .then((html) => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newProductsSection = doc.querySelector('#shopify-section-main-collection-product-grid');
-            const itemsContainer = document.getElementById('items-container');
-
-            let fetchedProductsCount = 0;
-
-            if (newProductsSection) {
-              const productItems = newProductsSection.querySelectorAll('.product-item');
-              fetchedProductsCount = productItems.length;
-              itemsContainer.innerHTML += newProductsSection.innerHTML;
-            } else {
-              itemsContainer.innerHTML += '<p>No products found</p>';
-            }
-
-            isLoading = false;
-
-            if (isInitialLoad) {
-              if (fetchedProductsCount < remainingProductsToLoad) {
-                currentSubIndex++;
-                loadMoreProducts(remainingProductsToLoad - fetchedProductsCount);
-              } else {
-                initialLoadComplete = true;
-              }
-            }
-          })
-          .catch((error) => {
-            console.error('Error fetching products:', error);
-            isLoading = false;
-          });
-      }
-    </script>
   </body>
 </html>

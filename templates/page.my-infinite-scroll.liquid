@@ -185,7 +185,7 @@
               `.sub-collection-item .filter-button[data-category="${activeSubCollections[currentSubIndex]}"]`
             )
           );
-        } else if (currentSubIndex >= activeSubCollections.length && totalProductsLoaded < 30) {
+        } else if (currentSubIndex >= activeSubCollections.length && totalProductsLoaded < remainingProductsToLoad) {
           const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
           if (currentParentIndex < parentCollections.length - 1) {
             currentParentIndex++;

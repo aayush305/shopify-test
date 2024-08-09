@@ -85,7 +85,7 @@
       let currentSubIndex = 0;
       let isLoading = false;
       let totalProductsLoaded = 0;
-      let remainingProductsToLoad = 512;
+      let remainingProductsToLoad = 32;
       let maskCount = 1;
       let initialCall = true;
 
@@ -230,11 +230,11 @@
               if (remainingProductsToLoad > 0) {
                 loadMoreProducts();
               } else {
-                remainingProductsToLoad = 512;
+                remainingProductsToLoad = 16;
               }
             } else {
-              maskCount += 17;
-              remainingProductsToLoad = 512;
+              maskCount++;
+              remainingProductsToLoad = 16;
             }
             isLoading = false;
           })

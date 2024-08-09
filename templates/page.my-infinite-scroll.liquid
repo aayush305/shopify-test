@@ -79,13 +79,12 @@
       <!-- Your items will be rendered here dynamically -->
     </div>
 
-    <script>
+  <script>
   let activeCategory = null;
   let activeSubCollections = [];
   let currentParentIndex = 0;
   let currentSubIndex = 0;
   let isLoading = false;
-  let initialLoadComplete = false;
 
   document.addEventListener('DOMContentLoaded', () => {
     const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -100,10 +99,7 @@
   });
 
   function handleScroll() {
-    console.log('Scrolling...', 'Is loading:', isLoading);
-    console.log('Window height:', window.innerHeight,'Scroll Y:', window.scrollY,'Document body height:', document.body.offsetHeight);
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1500 && !isLoading) {
-      console.log('Loading more products...');
       loadMoreProducts(15);  // Fetch next 15 products on scroll
     }
   }
@@ -159,7 +155,6 @@
         subCollectionList.appendChild(subCollectionItem);
       });
       currentSubIndex = 0;
-      initialLoadComplete = false;
       loadMoreProducts(30);  // Load the initial 30 products
     } else {
       subCollectionList.classList.add('hidden');
@@ -188,7 +183,7 @@
         ),
         remainingProductsToLoad
       );
-    } else if (initialLoadComplete && currentSubIndex >= activeSubCollections.length) {
+    } else if (currentSubIndex >= activeSubCollections.length) {
       const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
       if (currentParentIndex < parentCollections.length - 1) {
         currentParentIndex++;
@@ -229,8 +224,6 @@
         if (fetchedProductsCount < remainingProductsToLoad) {
           currentSubIndex++;
           loadMoreProducts(remainingProductsToLoad - fetchedProductsCount);
-        } else {
-          initialLoadComplete = true;
         }
       })
       .catch((error) => {
@@ -239,6 +232,7 @@
       });
   }
 </script>
+
 
   </body>
 </html>

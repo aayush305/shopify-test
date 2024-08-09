@@ -86,7 +86,6 @@
       let currentSubIndex = 0;
       let isLoading = false;
       let initialLoadComplete = false;
-      let totalFetchedProducts = 0; // Track the total number of fetched products
 
       document.addEventListener('DOMContentLoaded', () => {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -101,8 +100,15 @@
       });
 
       function handleScroll() {
+        console.log('Scrolling...', isLoading);
+        console.log(
+          window.innerHeight,
+          window.scrollY,
+          window.innerHeight + window.scrollY,
+          document.body.offsetHeight - 1500
+        );
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1500 && !isLoading) {
-          loadMoreProducts(30 - totalFetchedProducts); // Load more products based on the remaining number needed
+          loadMoreProducts(15);
         }
       }
 
@@ -117,11 +123,6 @@
 
         // Store the active category
         activeCategory = category;
-
-        // Reset product count and indexes for a new category
-        totalFetchedProducts = 0;
-        currentSubIndex = 0;
-        initialLoadComplete = false;
 
         // Show sub-collections if available
         showSubCollections(category);
@@ -161,6 +162,8 @@
             subCollectionItem.appendChild(subCollectionButton);
             subCollectionList.appendChild(subCollectionItem);
           });
+          currentSubIndex = 0;
+          initialLoadComplete = false;
           loadMoreProducts(30); // Load the initial 30 products
         } else {
           subCollectionList.classList.add('hidden');
@@ -225,14 +228,13 @@
               itemsContainer.innerHTML += '<p>No products found</p>';
             }
 
-            totalFetchedProducts += fetchedProductsCount;
             isLoading = false;
 
-            if (fetchedProductsCount < remainingProductsToLoad) {
-              currentSubIndex++;
-              loadMoreProducts(remainingProductsToLoad - fetchedProductsCount);
-            } else {
-              if (isInitialLoad) {
+            if (isInitialLoad) {
+              if (fetchedProductsCount < remainingProductsToLoad) {
+                currentSubIndex++;
+                loadMoreProducts(remainingProductsToLoad - fetchedProductsCount);
+              } else {
                 initialLoadComplete = true;
               }
             }

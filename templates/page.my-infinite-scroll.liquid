@@ -85,7 +85,7 @@
       let currentSubIndex = 0;
       let isLoading = false;
       let totalProductsLoaded = 0;
-      let remainingProductsToLoad = 30;
+      let remainingProductsToLoad = 32;
       let maskCount = 1;
 
       document.addEventListener('DOMContentLoaded', () => {
@@ -101,8 +101,8 @@
       });
 
       function handleScroll() {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1500 && !isLoading) {
-          loadMoreProducts(15); // Fetch next 15 products on scroll
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !isLoading) {
+          loadMoreProducts();
         }
       }
 
@@ -158,7 +158,7 @@
           });
           currentSubIndex = 0;
           totalProductsLoaded = 0;
-          loadMoreProducts(30); // Load the initial 30 products
+          loadMoreProducts();
         } else {
           subCollectionList.classList.add('hidden');
         }
@@ -227,11 +227,11 @@
               if (remainingProductsToLoad > 0) {
                 loadMoreProducts();
               } else {
-                remainingProductsToLoad = 15;
+                remainingProductsToLoad = 16;
               }
             } else {
               maskCount++;
-              remainingProductsToLoad = 15;
+              remainingProductsToLoad = 16;
             }
             isLoading = false;
           })

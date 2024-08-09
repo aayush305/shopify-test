@@ -117,7 +117,8 @@
       }
 
       function getFirstVisibleLI() {
-        const ulElements = document.querySelectorAll('#shopify-section-main-collection-product-grid .ul');
+        const gridData = document.querySelector('#shopify-section-main-collection-product-grid');
+        const ulElements = gridData.querySelectorAll('ul');
         for (let ul of ulElements) {
             const liElements = ul.querySelectorAll('li');
             for (let li of liElements) {

@@ -103,7 +103,6 @@
 
       function handleScroll() {
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !isLoading) {
-          console.log('Loading more products... from handleScroll');
           loadMoreProducts();
         }
       }
@@ -205,7 +204,6 @@
       }
 
       function fetchAndRenderProducts(category) {
-        console.log('Fetching products for:', category, 'maskCount:', maskCount, 'remainingProductsToLoad:',remainingProductsToLoad);
         isLoading = true;
         const url = `/collections/${category}/products?section_id=main-collection-product-grid&limit=${remainingProductsToLoad}&page=${maskCount}`;
 

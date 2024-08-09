@@ -117,7 +117,7 @@
       }
 
       function getFirstVisibleLI() {
-        const gridData = document.querySelector('items-container');
+        const gridData = document.getElementById('items-container');
         const ulElements = gridData.querySelectorAll('ul');
         for (let ul of ulElements) {
             const liElements = ul.querySelectorAll('li');

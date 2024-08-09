@@ -102,6 +102,7 @@
 
       function handleScroll() {
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !isLoading) {
+          console.log('Loading more products... from handleScroll');
           loadMoreProducts();
         }
       }

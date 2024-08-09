@@ -218,10 +218,7 @@
               const productItems = newProductsSection.querySelectorAll('li');
               fetchedProductsCount = productItems.length;
               itemsContainer.innerHTML += newProductsSection.innerHTML;
-            } else {
-              itemsContainer.innerHTML += '<p>No products found</p>';
             }
-            console.log('Fetched products:', fetchedProductsCount);
 
             if (fetchedProductsCount < remainingProductsToLoad) {
               currentSubIndex++;

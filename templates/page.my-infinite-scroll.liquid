@@ -200,6 +200,7 @@
       }
 
       function fetchAndRenderProducts(category) {
+        console.log('Fetching products for:', category);
         isLoading = true;
         const url = `/collections/${category}/products?section_id=main-collection-product-grid&limit=${remainingProductsToLoad}&page=${maskCount}`;
 
@@ -214,7 +215,6 @@
             let fetchedProductsCount = 0;
 
             if (newProductsSection.querySelector('li')) {
-              console.log(newProductsSection.querySelector('ul'));
               const productItems = newProductsSection.querySelectorAll('li');
               fetchedProductsCount = productItems.length;
               itemsContainer.innerHTML += newProductsSection.innerHTML;

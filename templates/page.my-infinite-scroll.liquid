@@ -100,7 +100,10 @@
   });
 
   function handleScroll() {
+    console.log('Scrolling...', 'Is loading:', isLoading);
+    console.log('Window height:', window.innerHeight,'Scroll Y:', window.scrollY,'Document body height:', document.body.offsetHeight);
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1500 && !isLoading) {
+      console.log('Loading more products...');
       loadMoreProducts(15);  // Fetch next 15 products on scroll
     }
   }

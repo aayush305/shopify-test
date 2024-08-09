@@ -213,7 +213,7 @@
 
             let fetchedProductsCount = 0;
 
-            if (newProductsSection) {
+            if (newProductsSection.querySelector('ul')) {
               const productItems = newProductsSection.querySelectorAll('li');
               fetchedProductsCount = productItems.length;
               itemsContainer.innerHTML += newProductsSection.innerHTML;

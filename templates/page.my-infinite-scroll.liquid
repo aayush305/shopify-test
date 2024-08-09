@@ -87,6 +87,7 @@
       let totalProductsLoaded = 0;
       let remainingProductsToLoad = 32;
       let maskCount = 1;
+      let initialCall = true;
 
       document.addEventListener('DOMContentLoaded', () => {
         const parentCollections = document.querySelectorAll('#parent-collections .filter-button');
@@ -159,7 +160,10 @@
           });
           currentSubIndex = 0;
           totalProductsLoaded = 0;
-          loadMoreProducts();
+          if(initialCall){
+            initialCall = false;
+            loadMoreProducts();
+          }
         } else {
           subCollectionList.classList.add('hidden');
         }

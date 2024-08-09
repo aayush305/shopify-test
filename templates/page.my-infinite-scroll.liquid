@@ -122,7 +122,7 @@
         for (let ul of ulElements) {
             const liElements = ul.querySelectorAll('li');
             for (let li of liElements) {
-                if (li.is(':visible')) {
+                if ($(li).is(':visible')) {
                     return li; // Return the first visible <li> element
                 }
             }

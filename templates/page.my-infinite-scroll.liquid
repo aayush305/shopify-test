@@ -167,7 +167,7 @@
             subCollectionButton.classList.add(button_id);
             subCollectionButton.textContent = subCollection;
             subCollectionButton.dataset.category = button_id;
-            subCollectionButton.parent.categoryName = category;
+            subCollectionButton.dataset.categoryName = category;
             subCollectionButton.onclick = () =>
               selectSubCategory(button_id, subCollectionButton);
 

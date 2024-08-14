@@ -231,7 +231,7 @@
             if (newProductsSection.querySelector('li')) {
               const productItems = newProductsSection.querySelectorAll('li');
               fetchedProductsCount = productItems.length;
-              itemsContainer.innerHTML += newProductsSection.innerHTML;
+              itemsContainer.innerHTML = newProductsSection.innerHTML;
             }
 
             if (fetchedProductsCount < remainingProductsToLoad) {

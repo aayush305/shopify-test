@@ -120,9 +120,9 @@
               button?.classList.add('active');
             });
 
-          // document.querySelectorAll('#parent-collections .filter-button').forEach((button) => {
-          //   button?.classList.remove('active');
-          // });
+          document.querySelectorAll('#parent-collections .filter-button').forEach((button) => {
+            button?.classList.remove('active');
+          });
 
           // document
           //   .querySelector(
@@ -248,6 +248,7 @@
               const productItems = newProductsSection.querySelectorAll('li');
               fetchedProductsCount = productItems.length;
               itemsContainer.innerHTML += newProductsSection.innerHTML;
+              handleScroll();
             }
 
             if (fetchedProductsCount < remainingProductsToLoad) {

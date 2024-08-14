@@ -66,7 +66,9 @@
         {% assign collections = 'Fresh Fish:Seasonings:Baked Fish:Ground Fish' | split: ':' %}
         {% for collection in collections %}
           <li class="collection-item">
-            <button class="filter-button {{ collection | handleize }}" data-category="{{ collection | handleize }}">{{ collection }}</button>
+            <button class="filter-button {{ collection | handleize }}" data-category="{{ collection | handleize }}">
+              {{ collection }}
+            </button>
           </li>
         {% endfor %}
       </ul>
@@ -107,7 +109,15 @@
         const firstVisibleLI = getFirstVisibleLI();
         if (firstVisibleLI) {
           const dataSet = firstVisibleLI.getAttribute('dataClass');
+          document.querySelectorAll('.sub-collection-item .filter-button').forEach((button) => {
+            button.classList.remove('active');
+          });
 
+          document.querySelectorAll(`.sub-collection-item .filter-button[data-category="${dataSet}"]`).forEach((button) => {
+            button.classList.add('active');
+          });
+
+          element.classList.add('active');
           console.log('First visible <li> dataSet:', dataSet);
         }
       }
@@ -168,8 +178,7 @@
             subCollectionButton.textContent = subCollection;
             subCollectionButton.dataset.category = button_id;
             subCollectionButton.dataset.categoryName = category;
-            subCollectionButton.onclick = () =>
-              selectSubCategory(button_id, subCollectionButton);
+            subCollectionButton.onclick = () => selectSubCategory(button_id, subCollectionButton);
 
             subCollectionItem.appendChild(subCollectionButton);
             subCollectionList.appendChild(subCollectionItem);
@@ -186,12 +195,6 @@
       }
 
       function selectSubCategory(subCategory, element) {
-        document.querySelectorAll('.sub-collection-item .filter-button').forEach((button) => {
-          button.classList.remove('active');
-        });
-
-        element.classList.add('active');
-
         fetchAndRenderProducts(subCategory);
       }
 

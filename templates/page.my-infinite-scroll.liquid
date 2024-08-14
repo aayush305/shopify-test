@@ -109,6 +109,7 @@
         const firstVisibleLI = getFirstVisibleLI();
         if (firstVisibleLI) {
           const dataSet = firstVisibleLI.getAttribute('dataClass');
+          console.log('First visible <li> dataSet:', dataSet);
           document.querySelectorAll('.sub-collection-item .filter-button').forEach((button) => {
             button.classList.remove('active');
           });
@@ -128,9 +129,6 @@
               `#parent-collections .filter-button[data-category="${firstVisibleLI.getAttribute('data-category-name')}"]`
             )
             .classList.add('active');
-
-          element.classList.add('active');
-          console.log('First visible <li> dataSet:', dataSet);
         }
       }
 

@@ -156,17 +156,20 @@
 
         if (subCollections[category]) {
           subCollections[category].forEach((subCollection) => {
-            activeSubCollections.push(subCollection.toLowerCase().replace(/\s+/g, '-'));
+            const button_id = subCollection.toLowerCase().replace(/\s+/g, '-');
+            activeSubCollections.push(button_id);
 
             const subCollectionItem = document.createElement('li');
             subCollectionItem.classList.add('sub-collection-item');
 
             const subCollectionButton = document.createElement('button');
             subCollectionButton.classList.add('filter-button');
+            subCollectionButton.classList.add(button_id);
             subCollectionButton.textContent = subCollection;
-            subCollectionButton.dataset.category = subCollection.toLowerCase().replace(/\s+/g, '-');
+            subCollectionButton.dataset.category = button_id;
+            subCollectionButton.dataset.categoryName = category;
             subCollectionButton.onclick = () =>
-              selectSubCategory(subCollection.toLowerCase().replace(/\s+/g, '-'), subCollectionButton);
+              selectSubCategory(button_id, subCollectionButton);
 
             subCollectionItem.appendChild(subCollectionButton);
             subCollectionList.appendChild(subCollectionItem);

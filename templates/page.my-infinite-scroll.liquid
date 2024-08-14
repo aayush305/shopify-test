@@ -66,7 +66,7 @@
         {% assign collections = 'Fresh Fish:Seasonings:Baked Fish:Ground Fish' | split: ':' %}
         {% for collection in collections %}
           <li class="collection-item">
-            <button class="filter-button" data-category="{{ collection | handleize }}">{{ collection }}</button>
+            <button class="filter-button {{ collection | handleize }}" data-category="{{ collection | handleize }}">{{ collection }}</button>
           </li>
         {% endfor %}
       </ul>

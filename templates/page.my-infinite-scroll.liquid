@@ -96,7 +96,6 @@
       const parentCollectionsContainer = document.getElementById('parent-collections');
         const subCollectionsContainer = document.getElementById('sub-collection-list');
 
-        // Function to create a parent collection button
         function createParentButton(parentName) {
           const listItem = document.createElement('li');
           listItem.className = 'collection-item';
@@ -110,43 +109,37 @@
           return listItem;
         }
 
-        // Function to create child collection buttons
         function createChildButtons(childNames) {
-          subCollectionsContainer.innerHTML = ''; // Clear previous children
+          subCollectionsContainer.innerHTML = ''; 
           childNames.forEach(childName => {
-      const listItem = document.createElement('li');
-      listItem.className = 'sub-collection-item';
-
-      const button = document.createElement('button');
-      button.className = `filter-button ${childName.replace(/\s+/g, '-').toLowerCase()}`;
-      button.setAttribute('data-category', childName);
-      button.textContent = childName;
-
-      listItem.appendChild(button);
-      subCollectionsContainer.appendChild(listItem);
+            const listItem = document.createElement('li');
+            listItem.className = 'sub-collection-item';
+            
+            const button = document.createElement('button');
+            button.className = `filter-button ${childName.replace(/\s+/g, '-').toLowerCase()}`;
+            button.setAttribute('data-category', childName);
+            button.textContent = childName;
+            
+            listItem.appendChild(button);
+            subCollectionsContainer.appendChild(listItem);
           });
 
           subCollectionsContainer.classList.remove('hidden');
         }
 
-        // Loop through parent collections and append to the DOM
         for (let parentName in collectionHandles) {
           const parentButton = createParentButton(parentName);
           parentCollectionsContainer.appendChild(parentButton);
 
-          // Add event listener to show child collections when parent is clicked
           parentButton.addEventListener('click', function() {
-      const childCollections = collectionHandles[parentName];
-      createChildButtons(childCollections);
+          const childCollections = collectionHandles[parentName];
+          createChildButtons(childCollections);
 
-      // Add logic to handle the active state of parent buttons if needed
-      const parentButtons = parentCollectionsContainer.querySelectorAll('.filter-button');
-      parentButtons.forEach(btn => btn.classList.remove('active'));
-      this.querySelector('.filter-button').classList.add('active');
+          const parentButtons = parentCollectionsContainer.querySelectorAll('.filter-button');
+          parentButtons.forEach(btn => btn.classList.remove('active'));
+          this.querySelector('.filter-button').classList.add('active');
           });
         }
-
-      // Now you can add event listeners or other logic as needed
           });
     </script>
   </body>

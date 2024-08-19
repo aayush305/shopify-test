@@ -86,7 +86,7 @@
 
       let collectionMetaData = {
         {% for collection in collections %}
-          "{{ collection | escape | replace: '"', '\\"' }}": {{ collections[collection].products_count }}{% unless forloop.last %},{% endunless %}
+          "{{ collection | escape | replace: '"', '\\"' }}": {{ collections[collection].all_products_count }}{% unless forloop.last %},{% endunless %}
         {% endfor %}
       };
 

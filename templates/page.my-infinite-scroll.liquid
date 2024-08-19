@@ -86,11 +86,11 @@
 
       let collectionMetaData = {
         {% for collection in collections %}
-          "{{ collection.title | escape | replace: '"', '\\"' }}": {{ collection.all_products_count }}{% unless forloop.last %},{% endunless %}
+          "{{ collection | escape | replace: '"', '\\"' }}": {{ collections[collection].products_count }}{% unless forloop.last %},{% endunless %}
         {% endfor %}
       };
 
-      console.log("Collection metadata:", collectionMetaData, Object.keys(collectionMetaData));
+      console.log("Collection metadata:", collectionMetaData);
     </script>
 
   </body>

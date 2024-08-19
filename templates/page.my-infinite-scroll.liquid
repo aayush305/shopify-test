@@ -85,12 +85,13 @@
       console.log("Start of script");
 
       let collectionMetaData = {
-        {% for collection in collections %}
-          "{{ collection | escape | replace: '"', '\\"' }}": {{ collections[collection].products_count }}{% unless forloop.last %},{% endunless %}
+        {% assign all_collections = collections.all %}
+        {% for collection in all_collections %}
+          "{{ collection.title | escape | replace: '"', '\\"' }}": {{ collection.products_count }}{% unless forloop.last %},{% endunless %}
         {% endfor %}
       };
 
-      console.log("Collection metadata:", collectionMetaData);
+      console.log("Collection metadata:", collectionMetaData, Object.keys(collectionMetaData));
     </script>
 
   </body>

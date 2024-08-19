@@ -63,14 +63,7 @@
     <div class="sticky-header">
       <h2>Collections</h2>
       <ul class="collection-list" id="parent-collections">
-        {% assign collection_handles = 'fresh-fish:seasonings:baked-fish:ground-fish' | split: ':' %}
-        {% for handle in collection_handles %}
-          <li class="collection-item">
-            <button class="filter-button {{ handle }}" data-category="{{ handle }}">
-              {{ handle | replace: '-', ' ' | capitalize }}
-            </button>
-          </li>
-        {% endfor %}
+        <!-- Collection items will be dynamically added here by JavaScript -->
       </ul>
       <ul class="sub-collection-list hidden" id="sub-collection-list">
         <!-- Sub-collections will be dynamically added here -->

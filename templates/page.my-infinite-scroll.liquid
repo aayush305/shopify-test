@@ -83,11 +83,6 @@
     <script>
   console.log("Start of script");
 
-  let collectionMetaData = {
-    {% for collection in collections %}
-      "{{ collection.title | escape | replace: '"', '\"' }}": {{ collection.products_count }}{% unless forloop.last %},{% endunless %}
-    {% endfor %}
-  };
 
   console.log("Collection metadata:", collectionMetaData);
 </script>

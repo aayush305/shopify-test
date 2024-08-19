@@ -80,12 +80,19 @@
     <div id="items-container">
       <!-- Your items will be rendered here dynamically -->
     </div>
+    
     <script>
-  console.log("Start of script");
+      console.log("Start of script");
 
+      let collectionMetaData = {
+        {% assign all_collections = collections.all %}
+        {% for collection in all_collections %}
+          "{{ collection.title | escape | replace: '"', '\\"' }}": {{ collection.products_count }}{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      };
 
-  console.log("Collection metadata:", collectionMetaData);
-</script>
+      console.log("Collection metadata:", collectionMetaData);
+    </script>
 
   </body>
 </html>

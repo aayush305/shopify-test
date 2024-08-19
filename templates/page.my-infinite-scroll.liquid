@@ -85,8 +85,8 @@
       console.log("Start of script");
 
       let collectionMetaData = {
-        {% for collection in collections %}
-          "{{ collection.title | replace: '-', ' ' | capitalize }}": {{ collection.all_products_count | default: 0 }}{% unless forloop.last %},{% endunless %}
+        {% for handle in collection_handles %}
+          "{{ handle | replace: '-', ' ' | capitalize }}": {{ collections[handle].products_count | default: 0 }}{% unless forloop.last %},{% endunless %}
         {% endfor %}
       };
 

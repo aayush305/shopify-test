@@ -86,7 +86,7 @@
 
       let collectionMetaData = {
         {% for handle in collections %}
-          "{{ handle.title }}": {{ collections.all_products_count | default: 0 }}{% unless forloop.last %},{% endunless %}
+          "{{ handle.title }}": {{ handle.all_products_count | default: 0 }}{% unless forloop.last %},{% endunless %}
         {% endfor %}
       };
 

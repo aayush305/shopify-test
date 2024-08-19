@@ -63,7 +63,14 @@
     <div class="sticky-header">
       <h2>Collections</h2>
       <ul class="collection-list" id="parent-collections">
-        <!-- Collection items will be dynamically added here by JavaScript -->
+        {% assign collections = 'Fresh Fish:Seasonings:Baked Fish:Ground Fish' | split: ':' %}
+        {% for collection in collections %}
+          <li class="collection-item">
+            <button class="filter-button {{ collection | handleize }}" data-category="{{ collection | handleize }}">
+              {{ collection }}
+            </button>
+          </li>
+        {% endfor %}
       </ul>
       <ul class="sub-collection-list hidden" id="sub-collection-list">
         <!-- Sub-collections will be dynamically added here -->
@@ -76,20 +83,14 @@
     
     <script>
       console.log("Start of script");
-      
-      const collectionHandles = [
-        'fresh-fish',
-        'seasonings',
-        'baked-fish',
-        'ground-fish'
-      ];
+
       let collectionMetaData = {
-        {% for handle in collections %}
-          "{{ handle.title }}": {{ collections[handle].all_products_count | default: 0 }}{% unless forloop.last %},{% endunless %}
+        {% for collection in collections %}
+          "{{ collection.title | escape | replace: '"', '\\"' }}": {{ collection.all_products_count }}{% unless forloop.last %},{% endunless %}
         {% endfor %}
       };
 
-      console.log("Collection metadata:", collectionMetaData);
+      console.log("Collection metadata:", collectionMetaData, Object.keys(collectionMetaData));
     </script>
 
   </body>
